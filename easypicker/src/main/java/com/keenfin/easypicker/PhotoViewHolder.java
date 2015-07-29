@@ -31,20 +31,24 @@ public class PhotoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         mPhoto.setOnClickListener(this);
     }
 
-    public void setControl() {
+    public void setControl(int color) {
         mPhotoRemove.setVisibility(View.GONE);
 
         View parentBox = mPhoto.getRootView();
         GridLayoutManager.LayoutParams lp = (GridLayoutManager.LayoutParams) parentBox.getLayoutParams();
         lp.setMargins(lp.width / 6, lp.width / 6, lp.width / 6, lp.width / 6);
         parentBox.setLayoutParams(lp);
+
+        mPhoto.setColorFilter(color);
     }
 
-    public void setSize(int side) {
+    public void setSize(int side, int color) {
         View parentBox = mPhoto.getRootView();
         GridLayoutManager.LayoutParams lp = (GridLayoutManager.LayoutParams) parentBox.getLayoutParams();
         lp.height = lp.width = side;
         parentBox.setLayoutParams(lp);
+
+        mPhotoRemove.setColorFilter(color);
     }
 
     public void setPhoto(Bitmap photo) {

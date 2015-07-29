@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -34,8 +35,9 @@ import java.util.List;
 
 public class PhotoPicker extends RecyclerView {
     private int mRowHeight;
-    private int mImagesPerRow, mImagesPerRowPortrait, mImagesPerRowLandscape;
+    private int mImagesPerRow, mImagesPerRowPortrait = Constants.IMAGES_PER_ROW_P, mImagesPerRowLandscape = Constants.IMAGES_PER_ROW_L;
     private String mNewPhotosDir = Constants.NEW_PHOTOS_SAVE_DIR;
+    private int mColorPrimary, mColorAccent;
 
     private Context mContext;
     private PhotoAdapter mPhotoAdapter;
@@ -43,16 +45,18 @@ public class PhotoPicker extends RecyclerView {
     public PhotoPicker(Context context) {
         super(context);
         init(context);
+        mColorPrimary = mContext.getResources().getColor(R.color.primary);
+        mColorAccent = mContext.getResources().getColor(R.color.accent);
     }
 
     public PhotoPicker(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context);
+        init(context, attrs);
     }
 
     public PhotoPicker(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        init(context);
+        init(context, attrs);
     }
 
     private void init(Context context) {
@@ -60,9 +64,21 @@ public class PhotoPicker extends RecyclerView {
 
         PhotoAdapter adapter = new PhotoAdapter();
         setAdapter(adapter);
-        mImagesPerRow = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? Constants.IMAGES_PER_ROW_L : Constants.IMAGES_PER_ROW_P;
+
+        mImagesPerRow = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? mImagesPerRowLandscape : mImagesPerRowPortrait;
         setHasFixedSize(true);
         setLayoutManager(new GridLayoutManager(context, mImagesPerRow));
+    }
+
+    private void init(Context context, AttributeSet attrs) {
+        TypedArray styleable = context.obtainStyledAttributes(attrs, R.styleable.PhotoPicker, 0, 0);
+        mColorPrimary = styleable.getColor(R.styleable.PhotoPicker_primaryColor, R.color.primary);
+        mColorAccent = styleable.getColor(R.styleable.PhotoPicker_accentColor, R.color.accent);
+        mImagesPerRowLandscape = styleable.getInt(R.styleable.PhotoPicker_items_per_row_landscape, mImagesPerRowLandscape);
+        mImagesPerRowPortrait = styleable.getInt(R.styleable.PhotoPicker_items_per_row_portrait, mImagesPerRowPortrait);
+        styleable.recycle();
+
+        init(context);
     }
 
     @Override
@@ -145,6 +161,7 @@ public class PhotoPicker extends RecyclerView {
         @Override
         public PhotoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.photo_item, parent, false);
+            view.setBackgroundColor(mColorAccent);
             return new PhotoViewHolder(view);
         }
 
@@ -154,9 +171,9 @@ public class PhotoPicker extends RecyclerView {
             holder.setPhoto(mImages.get(position));
 
             if (position == 0)
-                holder.setControl();
+                holder.setControl(mColorPrimary);
             else
-                holder.setSize(mRowHeight);
+                holder.setSize(mRowHeight, mColorPrimary);
         }
 
         @Override

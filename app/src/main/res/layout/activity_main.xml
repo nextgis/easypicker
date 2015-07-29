@@ -6,6 +6,7 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:easypicker="http://schemas.android.com/apk/res-auto"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -18,6 +19,10 @@
     <com.keenfin.easypicker.PhotoPicker
         android:id="@+id/pp_easypicker"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        easypicker:accentColor="@color/accent_material_light"
+        easypicker:items_per_row_landscape="5"
+        easypicker:items_per_row_portrait="3"
+        easypicker:primaryColor="@color/primary_material_light"/>
 
 </RelativeLayout>

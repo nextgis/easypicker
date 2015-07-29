@@ -7,6 +7,10 @@
   -->
 
 <resources>
-    <color name="primary">#999</color>
-    <color name="accent">#555</color>
+    <declare-styleable name="PhotoPicker">
+        <attr name="items_per_row_portrait" format="integer" />
+        <attr name="items_per_row_landscape" format="integer" />
+        <attr name="primaryColor" format="color" />
+        <attr name="accentColor" format="color" />
+    </declare-styleable>
 </resources>
