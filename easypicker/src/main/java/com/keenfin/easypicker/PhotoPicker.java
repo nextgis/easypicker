@@ -130,7 +130,7 @@ public class PhotoPicker extends RecyclerView {
         mPhotoAdapter = (PhotoAdapter) adapter;
         super.setAdapter(adapter);
     }
-    
+
     public ArrayList<String> getImagesPath() {
         return mPhotoAdapter.getImagesPath();
     }
