@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PhotoPicker extends RecyclerView {
+    private int mMaxPhotos = -1;
     private int mRowHeight;
     private int mImagesPerRow, mImagesPerRowPortrait = Constants.IMAGES_PER_ROW_P, mImagesPerRowLandscape = Constants.IMAGES_PER_ROW_L;
     private String mNewPhotosDir = Constants.NEW_PHOTOS_SAVE_DIR;
@@ -72,13 +73,14 @@ public class PhotoPicker extends RecyclerView {
 
     private void init(Context context, AttributeSet attrs) {
         TypedArray styleable = context.obtainStyledAttributes(attrs, R.styleable.PhotoPicker, 0, 0);
-        mColorPrimary = styleable.getColor(R.styleable.PhotoPicker_primaryColor, R.color.primary);
-        mColorAccent = styleable.getColor(R.styleable.PhotoPicker_accentColor, R.color.accent);
-        mImagesPerRowLandscape = styleable.getInt(R.styleable.PhotoPicker_items_per_row_landscape, mImagesPerRowLandscape);
-        mImagesPerRowPortrait = styleable.getInt(R.styleable.PhotoPicker_items_per_row_portrait, mImagesPerRowPortrait);
-        styleable.recycle();
-
+        mImagesPerRowLandscape = styleable.getInt(R.styleable.PhotoPicker_photosPerRowLandscape, mImagesPerRowLandscape);
+        mImagesPerRowPortrait = styleable.getInt(R.styleable.PhotoPicker_photosPerRowPortrait, mImagesPerRowPortrait);
         init(context);
+
+        mMaxPhotos = styleable.getInt(R.styleable.PhotoPicker_maxPhotos, mMaxPhotos);
+        mColorPrimary = styleable.getColor(R.styleable.PhotoPicker_primaryColor, mContext.getResources().getColor(R.color.primary));
+        mColorAccent = styleable.getColor(R.styleable.PhotoPicker_accentColor, mContext.getResources().getColor(R.color.accent));
+        styleable.recycle();
     }
 
     @Override
@@ -210,6 +212,11 @@ public class PhotoPicker extends RecyclerView {
             int i = caller.getId();
             if (i == R.id.iv_photo) {
                 if (position == 0) {
+                    if (getItemCount() - 1 == mMaxPhotos) {
+                        Toast.makeText(mContext, String.format(mContext.getString(R.string.max_photos), mMaxPhotos), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                     builder.setTitle(R.string.photo_add);
                     builder.setItems(R.array.report_add_photos, new DialogInterface.OnClickListener() {
@@ -244,6 +251,9 @@ public class PhotoPicker extends RecyclerView {
                     builder.show();
                 }
             } else if (i == R.id.ib_remove) {
+                if (position == 0)
+                    return;
+
                 mImages.remove(position);
                 mImagesPath.remove(position);
                 notifyItemRemoved(position);

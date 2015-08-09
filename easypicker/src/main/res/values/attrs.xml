@@ -8,8 +8,9 @@
 
 <resources>
     <declare-styleable name="PhotoPicker">
-        <attr name="items_per_row_portrait" format="integer" />
-        <attr name="items_per_row_landscape" format="integer" />
+        <attr name="photosPerRowPortrait" format="integer" />
+        <attr name="photosPerRowLandscape" format="integer" />
+        <attr name="maxPhotos" format="integer" />
         <attr name="primaryColor" format="color" />
         <attr name="accentColor" format="color" />
     </declare-styleable>
