@@ -133,6 +133,10 @@ public class PhotoPicker extends RecyclerView {
         super.setAdapter(adapter);
     }
 
+    public void setMaxPhotos(int maxPhotos) {
+        mMaxPhotos = maxPhotos;
+    }
+
     public ArrayList<String> getImagesPath() {
         return mPhotoAdapter.getImagesPath();
     }
@@ -175,11 +179,7 @@ public class PhotoPicker extends RecyclerView {
         public void onBindViewHolder(final PhotoViewHolder holder, final int position) {
             holder.setOnClickListener(this);
             holder.setPhoto(mImages.get(position));
-
-            if (position == 0)
-                holder.setControl(mColorPrimary);
-            else
-                holder.setSize(mRowHeight, mColorPrimary);
+            holder.adjustControl(mRowHeight, mColorPrimary, position == 0);
         }
 
         @Override
