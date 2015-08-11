@@ -158,7 +158,7 @@ public class PhotoPicker extends RecyclerView {
         return mPhotoAdapter.getImagesPath();
     }
 
-    private Bitmap getBitmap(String path, int requiredSize) throws OutOfMemoryError {
+    public static Bitmap getBitmap(String path, int requiredSize) throws OutOfMemoryError {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(path, options);
@@ -266,6 +266,11 @@ public class PhotoPicker extends RecyclerView {
                         }
                     });
                     builder.show();
+                } else {
+                    Intent preview = new Intent(getContext(), PreviewActivity.class);
+                    preview.putExtra(Constants.BUNDLE_ATTACHED_IMAGES, getImagesPath());
+                    preview.putExtra(Constants.BUNDLE_NEW_PHOTO_PATH, position - 1);
+                    getContext().startActivity(preview);
                 }
             } else if (i == R.id.ib_remove) {
                 if (position == 0)

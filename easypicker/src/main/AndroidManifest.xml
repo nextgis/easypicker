@@ -5,11 +5,15 @@
   ~           http://www.boost.org/LICENSE_1_0.txt)
   -->
 
-<manifest package="com.keenfin.easypicker"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.keenfin.easypicker">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <application android:allowBackup="true"/>
+    <application android:allowBackup="true">
+        <activity
+            android:name=".PreviewActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+    </application>
 
 </manifest>
