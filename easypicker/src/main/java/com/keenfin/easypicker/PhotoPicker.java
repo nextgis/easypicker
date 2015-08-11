@@ -89,6 +89,8 @@ public class PhotoPicker extends RecyclerView {
         init(context);
 
         mMaxPhotos = styleable.getInt(R.styleable.PhotoPicker_maxPhotos, mMaxPhotos);
+        mNewPhotosDir = styleable.getString(R.styleable.PhotoPicker_newPhotosDirectory);
+        mNewPhotosDir = mNewPhotosDir == null ? Constants.NEW_PHOTOS_SAVE_DIR : mNewPhotosDir;
         mColorPrimary = styleable.getColor(R.styleable.PhotoPicker_primaryColor, mContext.getResources().getColor(R.color.primary));
         mColorAccent = styleable.getColor(R.styleable.PhotoPicker_accentColor, mContext.getResources().getColor(R.color.accent));
         styleable.recycle();
@@ -146,6 +148,10 @@ public class PhotoPicker extends RecyclerView {
 
     public void setMaxPhotos(int maxPhotos) {
         mMaxPhotos = maxPhotos;
+    }
+
+    public void setNewPhotosDirectory(String directoryName) {
+        mNewPhotosDir = directoryName;
     }
 
     public ArrayList<String> getImagesPath() {

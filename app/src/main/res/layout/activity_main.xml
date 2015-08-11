@@ -22,8 +22,9 @@
         android:layout_height="wrap_content"
         easypicker:accentColor="@color/accent_material_light"
         easypicker:maxPhotos="5"
-        easypicker:photosPerRowLandscape="5"
+        easypicker:newPhotosDirectory="YourAppName"
         easypicker:oneLineGallery="true"
+        easypicker:photosPerRowLandscape="5"
         easypicker:photosPerRowPortrait="3"
         easypicker:primaryColor="@color/primary_material_light" />
 

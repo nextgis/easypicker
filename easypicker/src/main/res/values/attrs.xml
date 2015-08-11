@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~           Copyright © 2015 Stanislav Petriakov
   ~  Distributed under the Boost Software License, Version 1.0.
   ~     (See accompanying file LICENSE_1_0.txt or copy at
@@ -12,6 +11,7 @@
         <attr name="photosPerRowLandscape" format="integer" />
         <attr name="oneLineGallery" format="boolean" />
         <attr name="maxPhotos" format="integer" />
+        <attr name="newPhotosDirectory" format="string" />
         <attr name="primaryColor" format="color" />
         <attr name="accentColor" format="color" />
     </declare-styleable>
