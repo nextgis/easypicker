@@ -40,7 +40,7 @@ public class PhotoPicker extends RecyclerView {
     private int mImagesPerRow, mImagesPerRowPortrait = Constants.IMAGES_PER_ROW_P, mImagesPerRowLandscape = Constants.IMAGES_PER_ROW_L;
     private String mNewPhotosDir = Constants.NEW_PHOTOS_SAVE_DIR;
     private int mColorPrimary, mColorAccent;
-    private boolean mIsOneLine = false;
+    private boolean mIsOneLine = false, mIsUsePreview = true;
 
     private Context mContext;
     private PhotoAdapter mPhotoAdapter;
@@ -88,6 +88,7 @@ public class PhotoPicker extends RecyclerView {
         mIsOneLine = styleable.getBoolean(R.styleable.PhotoPicker_oneLineGallery, false);
         init(context);
 
+        mIsUsePreview = styleable.getBoolean(R.styleable.PhotoPicker_usePreview, true);
         mMaxPhotos = styleable.getInt(R.styleable.PhotoPicker_maxPhotos, mMaxPhotos);
         mNewPhotosDir = styleable.getString(R.styleable.PhotoPicker_newPhotosDirectory);
         mNewPhotosDir = mNewPhotosDir == null ? Constants.NEW_PHOTOS_SAVE_DIR : mNewPhotosDir;
@@ -152,6 +153,10 @@ public class PhotoPicker extends RecyclerView {
 
     public void setNewPhotosDirectory(String directoryName) {
         mNewPhotosDir = directoryName;
+    }
+
+    public void setUsePreview(boolean usePreview) {
+        mIsUsePreview = usePreview;
     }
 
     public ArrayList<String> getImagesPath() {
@@ -267,6 +272,9 @@ public class PhotoPicker extends RecyclerView {
                     });
                     builder.show();
                 } else {
+                    if (!mIsUsePreview)
+                        return;
+
                     Intent preview = new Intent(getContext(), PreviewActivity.class);
                     preview.putExtra(Constants.BUNDLE_ATTACHED_IMAGES, getImagesPath());
                     preview.putExtra(Constants.BUNDLE_NEW_PHOTO_PATH, position - 1);
