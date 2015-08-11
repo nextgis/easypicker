@@ -10,6 +10,7 @@
     <declare-styleable name="PhotoPicker">
         <attr name="photosPerRowPortrait" format="integer" />
         <attr name="photosPerRowLandscape" format="integer" />
+        <attr name="oneLineGallery" format="boolean" />
         <attr name="maxPhotos" format="integer" />
         <attr name="primaryColor" format="color" />
         <attr name="accentColor" format="color" />

@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -39,6 +40,7 @@ public class PhotoPicker extends RecyclerView {
     private int mImagesPerRow, mImagesPerRowPortrait = Constants.IMAGES_PER_ROW_P, mImagesPerRowLandscape = Constants.IMAGES_PER_ROW_L;
     private String mNewPhotosDir = Constants.NEW_PHOTOS_SAVE_DIR;
     private int mColorPrimary, mColorAccent;
+    private boolean mIsOneLine = false;
 
     private Context mContext;
     private PhotoAdapter mPhotoAdapter;
@@ -68,13 +70,22 @@ public class PhotoPicker extends RecyclerView {
 
         mImagesPerRow = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? mImagesPerRowLandscape : mImagesPerRowPortrait;
         setHasFixedSize(true);
-        setLayoutManager(new GridLayoutManager(context, mImagesPerRow));
+
+        RecyclerView.LayoutManager layoutManager;
+
+        if (mIsOneLine)
+            layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        else
+            layoutManager = new GridLayoutManager(context, mImagesPerRow);
+
+        setLayoutManager(layoutManager);
     }
 
     private void init(Context context, AttributeSet attrs) {
         TypedArray styleable = context.obtainStyledAttributes(attrs, R.styleable.PhotoPicker, 0, 0);
         mImagesPerRowLandscape = styleable.getInt(R.styleable.PhotoPicker_photosPerRowLandscape, mImagesPerRowLandscape);
         mImagesPerRowPortrait = styleable.getInt(R.styleable.PhotoPicker_photosPerRowPortrait, mImagesPerRowPortrait);
+        mIsOneLine = styleable.getBoolean(R.styleable.PhotoPicker_oneLineGallery, false);
         init(context);
 
         mMaxPhotos = styleable.getInt(R.styleable.PhotoPicker_maxPhotos, mMaxPhotos);
@@ -116,7 +127,7 @@ public class PhotoPicker extends RecyclerView {
     protected void onMeasure(int widthSpec, int heightSpec) {
         super.onMeasure(widthSpec, heightSpec);
 
-        mRowHeight = getWidth() / mImagesPerRow;
+        mRowHeight = getMeasuredWidth() / mImagesPerRow;
         mPhotoAdapter.measureParent();
     }
 
@@ -179,7 +190,7 @@ public class PhotoPicker extends RecyclerView {
         public void onBindViewHolder(final PhotoViewHolder holder, final int position) {
             holder.setOnClickListener(this);
             holder.setPhoto(mImages.get(position));
-            holder.adjustControl(mRowHeight, mColorPrimary, position == 0);
+            holder.adjustControl(mRowHeight, mColorPrimary, position == 0, mIsOneLine);
         }
 
         @Override
@@ -296,7 +307,8 @@ public class PhotoPicker extends RecyclerView {
 
         public void measureParent() {
             ViewGroup.LayoutParams params = getLayoutParams();
-            params.height = (int) Math.ceil(1f * mImages.size() / mImagesPerRow) * mRowHeight;
+            int itemsCount = mIsOneLine ? 1 : mImages.size();
+            params.height = (int) Math.ceil(1f * itemsCount / mImagesPerRow) * mRowHeight;
             setLayoutParams(params);
         }
     }

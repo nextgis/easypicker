@@ -8,7 +8,6 @@
 package com.keenfin.easypicker;
 
 import android.graphics.Bitmap;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageButton;
@@ -31,17 +30,21 @@ public class PhotoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         mPhoto.setOnClickListener(this);
     }
 
-    public void adjustControl(int side, int color, boolean isControl) {
+    public void adjustControl(int side, int color, boolean isControl, boolean isOneLine) {
         View parentBox = mPhoto.getRootView();
-        GridLayoutManager.LayoutParams lp = (GridLayoutManager.LayoutParams) parentBox.getLayoutParams();
-        lp.height = lp.width = side;
+        RecyclerView.LayoutParams lp = (RecyclerView.LayoutParams) parentBox.getLayoutParams();
 
         if (isControl) {
-            lp.setMargins(lp.width / 6, lp.width / 6, lp.width / 6, lp.width / 6);
+            if (isOneLine)
+                lp.height = lp.width = side / 2;
+
+            lp.setMargins(side / 4, side / 4, side / 4, side / 4);
             mPhotoRemove.setVisibility(View.GONE);
             mPhoto.setColorFilter(color);
-        } else
+        } else {
+            lp.height = lp.width = side - lp.leftMargin - lp.rightMargin;
             mPhotoRemove.setColorFilter(color);
+        }
 
         parentBox.setLayoutParams(lp);
     }

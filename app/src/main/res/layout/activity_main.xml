@@ -23,6 +23,7 @@
         easypicker:accentColor="@color/accent_material_light"
         easypicker:maxPhotos="5"
         easypicker:photosPerRowLandscape="5"
+        easypicker:oneLineGallery="true"
         easypicker:photosPerRowPortrait="3"
         easypicker:primaryColor="@color/primary_material_light" />
 
