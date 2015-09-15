@@ -147,6 +147,10 @@ public class PhotoPicker extends RecyclerView {
         super.setAdapter(adapter);
     }
 
+    public void restoreImages(List<String> imagesPath) {
+        mPhotoAdapter.restoreImages(imagesPath);
+    }
+
     public void setMaxPhotos(int maxPhotos) {
         mMaxPhotos = maxPhotos;
     }
@@ -216,7 +220,7 @@ public class PhotoPicker extends RecyclerView {
             return images;
         }
 
-        public void restoreImages(ArrayList<String> imagesPath) {
+        protected void restoreImages(List<String> imagesPath) {
             for (String imagePath : imagesPath)
                 addImage(imagePath);
         }
