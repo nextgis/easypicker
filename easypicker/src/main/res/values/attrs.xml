@@ -11,6 +11,7 @@
         <attr name="photosPerRowLandscape" format="integer" />
         <attr name="oneLineGallery" format="boolean" />
         <attr name="usePreview" format="boolean" />
+        <attr name="noControls" format="boolean" />
         <attr name="maxPhotos" format="integer" />
         <attr name="newPhotosDirectory" format="string" />
         <attr name="primaryColor" format="color" />

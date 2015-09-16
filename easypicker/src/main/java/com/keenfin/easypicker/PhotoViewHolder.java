@@ -30,7 +30,7 @@ public class PhotoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         mPhoto.setOnClickListener(this);
     }
 
-    public void adjustControl(int side, int color, boolean isControl, boolean isOneLine) {
+    public void adjustControl(int side, int color, boolean isControl, boolean isOneLine, boolean noControls) {
         View parentBox = mPhoto.getRootView();
         RecyclerView.LayoutParams lp = (RecyclerView.LayoutParams) parentBox.getLayoutParams();
 
@@ -45,6 +45,9 @@ public class PhotoViewHolder extends RecyclerView.ViewHolder implements View.OnC
             lp.height = lp.width = side - lp.leftMargin - lp.rightMargin;
             mPhotoRemove.setColorFilter(color);
         }
+
+        if (noControls)
+            mPhotoRemove.setVisibility(View.GONE);
 
         parentBox.setLayoutParams(lp);
     }

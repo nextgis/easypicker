@@ -46,8 +46,12 @@ public class PhotoPicker extends RecyclerView {
     private PhotoAdapter mPhotoAdapter;
 
     public PhotoPicker(Context context) {
+        this(context, false);
+    }
+
+    public PhotoPicker(Context context, boolean noControls) {
         super(context);
-        init(context);
+        init(context, noControls);
         mColorPrimary = mContext.getResources().getColor(R.color.primary);
         mColorAccent = mContext.getResources().getColor(R.color.accent);
     }
@@ -62,10 +66,10 @@ public class PhotoPicker extends RecyclerView {
         init(context, attrs);
     }
 
-    private void init(Context context) {
+    private void init(Context context, boolean noControls) {
         mContext = context;
 
-        PhotoAdapter adapter = new PhotoAdapter();
+        PhotoAdapter adapter = new PhotoAdapter(noControls);
         setAdapter(adapter);
 
         mImagesPerRow = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? mImagesPerRowLandscape : mImagesPerRowPortrait;
@@ -86,7 +90,8 @@ public class PhotoPicker extends RecyclerView {
         mImagesPerRowLandscape = styleable.getInt(R.styleable.PhotoPicker_photosPerRowLandscape, mImagesPerRowLandscape);
         mImagesPerRowPortrait = styleable.getInt(R.styleable.PhotoPicker_photosPerRowPortrait, mImagesPerRowPortrait);
         mIsOneLine = styleable.getBoolean(R.styleable.PhotoPicker_oneLineGallery, false);
-        init(context);
+        boolean noControls = styleable.getBoolean(R.styleable.PhotoPicker_noControls, false);
+        init(context, noControls);
 
         mIsUsePreview = styleable.getBoolean(R.styleable.PhotoPicker_usePreview, true);
         mMaxPhotos = styleable.getInt(R.styleable.PhotoPicker_maxPhotos, mMaxPhotos);
@@ -187,11 +192,25 @@ public class PhotoPicker extends RecyclerView {
         private List<String> mImagesPath;
         private Uri mPhotoUri;
 
+        private boolean mNoControls = false;
+
         public PhotoAdapter() {
+            this(false);
+        }
+
+        public PhotoAdapter(boolean noControls) {
             mImages = new ArrayList<>();
             mImagesPath = new ArrayList<>();
-            mImages.add(BitmapFactory.decodeResource(getResources(), R.drawable.ic_add_white_48dp));
-            mImagesPath.add(null);
+            mNoControls = noControls;
+
+            if (!noControls)
+                addNewPhotoIcon();
+        }
+
+        private void addNewPhotoIcon() {
+            mImages.add(0, BitmapFactory.decodeResource(getResources(), R.drawable.ic_add_white_48dp));
+            mImagesPath.add(0, null);
+            notifyItemInserted(0);
         }
 
         @Override
@@ -205,7 +224,9 @@ public class PhotoPicker extends RecyclerView {
         public void onBindViewHolder(final PhotoViewHolder holder, final int position) {
             holder.setOnClickListener(this);
             holder.setPhoto(mImages.get(position));
-            holder.adjustControl(mRowHeight, mColorPrimary, position == 0, mIsOneLine);
+
+            boolean isControl = position == 0 && !mNoControls;
+            holder.adjustControl(mRowHeight, mColorPrimary, isControl, mIsOneLine, mNoControls);
         }
 
         @Override
@@ -216,7 +237,10 @@ public class PhotoPicker extends RecyclerView {
         public ArrayList<String> getImagesPath() {
             ArrayList<String> images = new ArrayList<>();
             images.addAll(mImagesPath);
-            images.remove(0);
+
+            if (!mNoControls)
+                images.remove(0);
+
             return images;
         }
 
@@ -237,7 +261,7 @@ public class PhotoPicker extends RecyclerView {
         public void onItemClick(View caller, int position) {
             int i = caller.getId();
             if (i == R.id.iv_photo) {
-                if (position == 0) {
+                if (position == 0 && !mNoControls) {
                     if (getItemCount() - 1 == mMaxPhotos) {
                         Toast.makeText(mContext, String.format(mContext.getString(R.string.max_photos), mMaxPhotos), Toast.LENGTH_SHORT).show();
                         return;
