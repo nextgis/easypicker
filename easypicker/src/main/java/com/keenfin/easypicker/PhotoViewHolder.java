@@ -62,6 +62,6 @@ public class PhotoViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     @Override
     public void onClick(View view) {
-        mViewHolderClick.onItemClick(view, getPosition());
+        mViewHolderClick.onItemClick(view, getAdapterPosition());
     }
 }

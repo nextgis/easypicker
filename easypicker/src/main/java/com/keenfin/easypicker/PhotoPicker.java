@@ -278,7 +278,7 @@ public class PhotoPicker extends RecyclerView {
             int i = caller.getId();
             if (i == R.id.iv_photo) {
                 if (position == 0 && !mNoControls) {
-                    if (getItemCount() - 1 == mMaxPhotos) {
+                    if (getItemCount() - 1 >= mMaxPhotos) {
                         Toast.makeText(mContext, String.format(mContext.getString(R.string.max_photos), mMaxPhotos), Toast.LENGTH_SHORT).show();
                         return;
                     }
