@@ -8,9 +8,6 @@
 package com.keenfin.easypicker;
 
 public interface Constants {
-    int CAMERA_REQUEST = 3451;
-    int PICK_REQUEST = 3452;
-
     int IMAGES_PER_ROW_P = 3;
     int IMAGES_PER_ROW_L = 5;
     int REQUIRED_THUMBNAIL_SIZE = 200;

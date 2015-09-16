@@ -33,6 +33,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class PhotoPicker extends RecyclerView {
     private int mMaxPhotos = -1;
@@ -40,6 +41,7 @@ public class PhotoPicker extends RecyclerView {
     private int mImagesPerRow, mImagesPerRowPortrait = Constants.IMAGES_PER_ROW_P, mImagesPerRowLandscape = Constants.IMAGES_PER_ROW_L;
     private String mNewPhotosDir = Constants.NEW_PHOTOS_SAVE_DIR;
     private int mColorPrimary, mColorAccent;
+    private int mCameraRequest, mPickRequest;
     private boolean mIsOneLine = false, mIsUsePreview = true;
 
     private Context mContext;
@@ -278,7 +280,7 @@ public class PhotoPicker extends RecyclerView {
             int i = caller.getId();
             if (i == R.id.iv_photo) {
                 if (position == 0 && !mNoControls) {
-                    if (getItemCount() - 1 >= mMaxPhotos) {
+                    if (mMaxPhotos > -1 && getItemCount() - 1 >= mMaxPhotos) {
                         Toast.makeText(mContext, String.format(mContext.getString(R.string.max_photos), mMaxPhotos), Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -289,6 +291,7 @@ public class PhotoPicker extends RecyclerView {
                         @Override
                         public void onClick(DialogInterface dialog, int item) {
                             Intent intent;
+                            Random randomizeRequest = new Random(System.currentTimeMillis());
                             switch (item) {
                                 case 0:
                                     intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -303,13 +306,15 @@ public class PhotoPicker extends RecyclerView {
                                     photo = new File(photo, System.currentTimeMillis() + ".jpg");
                                     mPhotoUri = Uri.fromFile(photo);
                                     intent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri);
-                                    ((Activity) mContext).startActivityForResult(intent, Constants.CAMERA_REQUEST);
+                                    mCameraRequest = randomizeRequest.nextInt(0xffff);
+                                    ((Activity) mContext).startActivityForResult(intent, mCameraRequest);
                                     break;
                                 case 1:
                                     intent = new Intent(Intent.ACTION_GET_CONTENT);
                                     intent.setType("image/*");
+                                    mPickRequest = randomizeRequest.nextInt(0xffff);
                                     ((Activity) mContext).startActivityForResult(
-                                            Intent.createChooser(intent, mContext.getString(R.string.photo_pick)), Constants.PICK_REQUEST);
+                                            Intent.createChooser(intent, mContext.getString(R.string.photo_pick)), mPickRequest);
                                     break;
                             }
                         }
@@ -337,16 +342,14 @@ public class PhotoPicker extends RecyclerView {
 
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             if (resultCode == Activity.RESULT_OK) {
-                String selectedImagePath = null;
+                String selectedImagePath;
 
-                switch (requestCode) {
-                    case Constants.CAMERA_REQUEST:
-                        selectedImagePath = mPhotoUri.getPath();
-                        break;
-                    case Constants.PICK_REQUEST:
-                        selectedImagePath = FileUtil.getPath(mContext, data.getData());
-                        break;
-                }
+                if (requestCode == mCameraRequest)
+                    selectedImagePath = mPhotoUri.getPath();
+                else if (requestCode == mPickRequest)
+                    selectedImagePath = FileUtil.getPath(mContext, data.getData());
+                else
+                    return;
 
                 addImage(selectedImagePath);
             }
