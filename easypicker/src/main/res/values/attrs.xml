@@ -7,14 +7,15 @@
 
 <resources>
     <declare-styleable name="PhotoPicker">
-        <attr name="photosPerRowPortrait" format="integer" />
-        <attr name="photosPerRowLandscape" format="integer" />
-        <attr name="oneLineGallery" format="boolean" />
-        <attr name="usePreview" format="boolean" />
-        <attr name="noControls" format="boolean" />
-        <attr name="maxPhotos" format="integer" />
-        <attr name="newPhotosDirectory" format="string" />
-        <attr name="primaryColor" format="color" />
-        <attr name="accentColor" format="color" />
+        <attr name="maxPhotos" format="integer"/>
+        <attr name="newPhotosIcon" format="integer"/>
+        <attr name="photosPerRowPortrait" format="integer"/>
+        <attr name="photosPerRowLandscape" format="integer"/>
+        <attr name="oneLineGallery" format="boolean"/>
+        <attr name="usePreview" format="boolean"/>
+        <attr name="noControls" format="boolean"/>
+        <attr name="newPhotosDirectory" format="string"/>
+        <attr name="primaryColor" format="color"/>
+        <attr name="accentColor" format="color"/>
     </declare-styleable>
 </resources>

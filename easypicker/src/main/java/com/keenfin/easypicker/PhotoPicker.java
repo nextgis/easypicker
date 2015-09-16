@@ -44,6 +44,7 @@ public class PhotoPicker extends RecyclerView {
 
     private Context mContext;
     private PhotoAdapter mPhotoAdapter;
+    private Bitmap mNewPhotoIcon;
 
     public PhotoPicker(Context context) {
         this(context, false);
@@ -51,6 +52,7 @@ public class PhotoPicker extends RecyclerView {
 
     public PhotoPicker(Context context, boolean noControls) {
         super(context);
+        mNewPhotoIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_add_white_48dp);
         init(context, noControls);
         mColorPrimary = mContext.getResources().getColor(R.color.primary);
         mColorAccent = mContext.getResources().getColor(R.color.accent);
@@ -90,6 +92,8 @@ public class PhotoPicker extends RecyclerView {
         mImagesPerRowLandscape = styleable.getInt(R.styleable.PhotoPicker_photosPerRowLandscape, mImagesPerRowLandscape);
         mImagesPerRowPortrait = styleable.getInt(R.styleable.PhotoPicker_photosPerRowPortrait, mImagesPerRowPortrait);
         mIsOneLine = styleable.getBoolean(R.styleable.PhotoPicker_oneLineGallery, false);
+        int icon = styleable.getResourceId(R.styleable.PhotoPicker_newPhotosIcon, R.drawable.ic_add_white_48dp);
+        mNewPhotoIcon = BitmapFactory.decodeResource(getResources(), icon);
         boolean noControls = styleable.getBoolean(R.styleable.PhotoPicker_noControls, false);
         init(context, noControls);
 
@@ -168,6 +172,10 @@ public class PhotoPicker extends RecyclerView {
         mIsUsePreview = usePreview;
     }
 
+    public void setNewPhotosDrawable(int drawableResourceId) {
+        mPhotoAdapter.replaceNewPhotoIcon(drawableResourceId);
+    }
+
     public ArrayList<String> getImagesPath() {
         return mPhotoAdapter.getImagesPath();
     }
@@ -208,9 +216,17 @@ public class PhotoPicker extends RecyclerView {
         }
 
         private void addNewPhotoIcon() {
-            mImages.add(0, BitmapFactory.decodeResource(getResources(), R.drawable.ic_add_white_48dp));
+            mImages.add(0, mNewPhotoIcon);
             mImagesPath.add(0, null);
             notifyItemInserted(0);
+        }
+
+        protected void replaceNewPhotoIcon(int drawableResourceId) {
+            if (!mNoControls && mImages.size() > 0) {
+                mImages.remove(0);
+                mImages.add(0, BitmapFactory.decodeResource(getResources(), drawableResourceId));
+                notifyItemChanged(0);
+            }
         }
 
         @Override
