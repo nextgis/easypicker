@@ -20,7 +20,7 @@ ext {
     siteUrl = 'https://github.com/4eRTuk/easypicker'
     gitUrl = 'https://github.com/4eRTuk/easypicker.git'
 
-    libraryVersion = '0.2.1'
+    libraryVersion = '0.2.2'
 
     developerId = '4ert'
     developerName = 'Stanislav Petriakov'
@@ -38,8 +38,8 @@ android {
     defaultConfig {
         minSdkVersion 8
         targetSdkVersion 23
-        versionCode 4
-        versionName "0.2.1"
+        versionCode 5
+        versionName "0.2.2"
     }
     buildTypes {
         release {
@@ -49,8 +49,8 @@ android {
     }
 }
 
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
+//apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+//apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
