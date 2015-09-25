@@ -113,6 +113,8 @@ public class PhotoPicker extends RecyclerView {
         Bundle bundle = new Bundle();
         bundle.putParcelable("instanceState", super.onSaveInstanceState());
         bundle.putStringArrayList(Constants.BUNDLE_ATTACHED_IMAGES, mPhotoAdapter.getImagesPath());
+        bundle.putInt(Constants.BUNDLE_CAMERA_REQUEST, mCameraRequest);
+        bundle.putInt(Constants.BUNDLE_PICK_REQUEST, mPickRequest);
 
         if (mPhotoAdapter.getPhotoUri() != null)
             bundle.putString(Constants.BUNDLE_NEW_PHOTO_PATH, mPhotoAdapter.getPhotoUri().getPath());
@@ -129,6 +131,8 @@ public class PhotoPicker extends RecyclerView {
                 mPhotoAdapter.setPhotoUri(Uri.parse(bundle.getString(Constants.BUNDLE_NEW_PHOTO_PATH)));
 
             mPhotoAdapter.restoreImages(bundle.getStringArrayList(Constants.BUNDLE_ATTACHED_IMAGES));
+            mCameraRequest = bundle.getInt(Constants.BUNDLE_CAMERA_REQUEST);
+            mPickRequest = bundle.getInt(Constants.BUNDLE_PICK_REQUEST);
 
             super.onRestoreInstanceState(bundle.getParcelable("instanceState"));
             return;

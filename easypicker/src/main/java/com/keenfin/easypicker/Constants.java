@@ -14,5 +14,7 @@ public interface Constants {
 
     String BUNDLE_ATTACHED_IMAGES = "attached_images";
     String BUNDLE_NEW_PHOTO_PATH = "new_photo_path";
+    String BUNDLE_CAMERA_REQUEST = "camera_request";
+    String BUNDLE_PICK_REQUEST = "pick_request";
     String NEW_PHOTOS_SAVE_DIR = "EasyPicker";
 }
