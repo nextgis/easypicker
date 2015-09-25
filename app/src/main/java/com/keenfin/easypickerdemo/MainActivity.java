@@ -25,7 +25,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private PhotoPicker mPhotoPickerStrip;
     private PhotoPicker mPhotoPickerGrid;
     private PhotoPicker mPhotoPickerGridNoControls;
-    Uri sourceUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +33,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mPhotoPickerStrip = (PhotoPicker) findViewById(R.id.pp_easypicker_strip);
         mPhotoPickerGrid = (PhotoPicker) findViewById(R.id.pp_easypicker_grid);
         mPhotoPickerGridNoControls = (PhotoPicker) findViewById(R.id.pp_easypicker_grid_no_controls);
-        getSupportLoaderManager().initLoader(0, null, this);
+
+        if (savedInstanceState == null)
+            getSupportLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Uri sourceUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         return new CursorLoader(this, sourceUri, new String[]{MediaStore.MediaColumns.DATA}, null, null, MediaStore.Audio.Media.TITLE);
     }
 
@@ -54,9 +56,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if (data.moveToFirst()) {
             ArrayList<String> images = new ArrayList<>();
 
+            int i = 0;
             do {
                 images.add(data.getString(0));
-            } while (data.moveToNext());
+                i++;
+            } while (data.moveToNext() && i < 6);
 
             mPhotoPickerGridNoControls.restoreImages(images);
         }
