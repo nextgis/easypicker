@@ -328,9 +328,10 @@ public class PhotoPicker extends RecyclerView {
                     if (!mIsUsePreview)
                         return;
 
+                    int offset = mNoControls ? 0 : 1;
                     Intent preview = new Intent(getContext(), PreviewActivity.class);
                     preview.putExtra(Constants.BUNDLE_ATTACHED_IMAGES, getImagesPath());
-                    preview.putExtra(Constants.BUNDLE_NEW_PHOTO_PATH, position - 1);
+                    preview.putExtra(Constants.BUNDLE_NEW_PHOTO_PATH, position - offset);
                     getContext().startActivity(preview);
                 }
             } else if (i == R.id.ib_remove) {
