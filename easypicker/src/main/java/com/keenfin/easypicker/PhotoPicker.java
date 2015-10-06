@@ -43,6 +43,7 @@ public class PhotoPicker extends RecyclerView {
     private int mColorPrimary, mColorAccent;
     private int mCameraRequest, mPickRequest;
     private boolean mIsOneLine = false, mIsUsePreview = true;
+    private boolean mPrimaryColorDefined, mAccentColorDefined;
 
     private Context mContext;
     private PhotoAdapter mPhotoAdapter;
@@ -56,8 +57,6 @@ public class PhotoPicker extends RecyclerView {
         super(context);
         mNewPhotoIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_add_white_48dp);
         init(context, noControls);
-        mColorPrimary = mContext.getResources().getColor(R.color.primary);
-        mColorAccent = mContext.getResources().getColor(R.color.accent);
     }
 
     public PhotoPicker(Context context, AttributeSet attrs) {
@@ -87,6 +86,14 @@ public class PhotoPicker extends RecyclerView {
             layoutManager = new GridLayoutManager(context, mImagesPerRow);
 
         setLayoutManager(layoutManager);
+
+        int[] attrs = new int[] { R.attr.colorPrimary, R.attr.colorAccent };
+        TypedArray styleable = context.obtainStyledAttributes(attrs);
+        if (!mPrimaryColorDefined)
+            mColorPrimary = getColor(styleable, 0, R.color.primary);
+        if (!mAccentColorDefined)
+            mColorAccent = getColor(styleable, 1, R.color.accent);
+        styleable.recycle();
     }
 
     private void init(Context context, AttributeSet attrs) {
@@ -99,13 +106,21 @@ public class PhotoPicker extends RecyclerView {
         boolean noControls = styleable.getBoolean(R.styleable.PhotoPicker_noControls, false);
         init(context, noControls);
 
+        if (mPrimaryColorDefined = styleable.hasValue(R.styleable.PhotoPicker_primaryColor))
+            mColorPrimary = getColor(styleable, R.styleable.PhotoPicker_primaryColor, R.color.primary);
+        if (mAccentColorDefined = styleable.hasValue(R.styleable.PhotoPicker_accentColor))
+            mColorAccent = getColor(styleable, R.styleable.PhotoPicker_accentColor, R.color.accent);
+
         mIsUsePreview = styleable.getBoolean(R.styleable.PhotoPicker_usePreview, true);
         mMaxPhotos = styleable.getInt(R.styleable.PhotoPicker_maxPhotos, mMaxPhotos);
         mNewPhotosDir = styleable.getString(R.styleable.PhotoPicker_newPhotosDirectory);
         mNewPhotosDir = mNewPhotosDir == null ? Constants.NEW_PHOTOS_SAVE_DIR : mNewPhotosDir;
-        mColorPrimary = styleable.getColor(R.styleable.PhotoPicker_primaryColor, mContext.getResources().getColor(R.color.primary));
-        mColorAccent = styleable.getColor(R.styleable.PhotoPicker_accentColor, mContext.getResources().getColor(R.color.accent));
         styleable.recycle();
+    }
+
+    @SuppressWarnings("deprecation")
+    private int getColor(TypedArray array, int index, int defValue) {
+        return array.getColor(index, mContext.getResources().getColor(defValue));
     }
 
     @Override

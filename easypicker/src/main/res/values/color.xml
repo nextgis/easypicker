@@ -7,6 +7,6 @@
   -->
 
 <resources>
-    <color name="primary">#999</color>
+    <color name="primary">#eee</color>
     <color name="accent">#555</color>
 </resources>
