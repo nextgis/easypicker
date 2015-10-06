@@ -350,7 +350,7 @@ public class PhotoPicker extends RecyclerView {
                     getContext().startActivity(preview);
                 }
             } else if (i == R.id.ib_remove) {
-                if (position == 0)
+                if (position <= 0)
                     return;
 
                 mImages.remove(position);
