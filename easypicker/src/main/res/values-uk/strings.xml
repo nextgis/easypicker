@@ -1,0 +1,16 @@
+<!--
+  ~           Copyright © 2015 Stanislav Petriakov
+  ~  Distributed under the Boost Software License, Version 1.0.
+  ~     (See accompanying file LICENSE_1_0.txt or copy at
+  ~           http://www.boost.org/LICENSE_1_0.txt)
+  -->
+
+<resources>
+  <string name="photo_take">Нове фото</string>
+  <string name="photo_pick">Обрати фото</string>
+  <string name="photo_add">Додати фото</string>
+  <string name="photo_remove">Видалити</string>
+  <string name="photo_fail_attach">Неможливо прикріпити фото</string>
+  <string name="hw_error">Пам\'ять пристрою тимчасово недоступна</string>
+  <string name="max_photos">Максимум %d фото</string>
+</resources>
