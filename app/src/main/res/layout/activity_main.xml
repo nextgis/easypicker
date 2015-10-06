@@ -25,11 +25,9 @@
             android:id="@+id/pp_easypicker_strip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            easypicker:accentColor="@color/accent_material_light"
             easypicker:maxPhotos="5"
             easypicker:newPhotosDirectory="YourAppName"
             easypicker:oneLineGallery="true"
-            easypicker:primaryColor="@color/primary_material_light"
             easypicker:usePreview="false"/>
 
         <com.keenfin.easypicker.PhotoPicker
@@ -43,13 +41,13 @@
             easypicker:newPhotosIcon="@android:drawable/ic_menu_add"
             easypicker:photosPerRowLandscape="8"
             easypicker:photosPerRowPortrait="5"
-            easypicker:primaryColor="@color/accent_material_light"/>
+            easypicker:primaryColor="@color/accent"/>
 
         <com.keenfin.easypicker.PhotoPicker
             android:id="@+id/pp_easypicker_grid_no_controls"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            easypicker:accentColor="@color/accent_material_light"
+            easypicker:accentColor="@color/primary"
             easypicker:noControls="true"
             easypicker:photosPerRowLandscape="3"
             easypicker:photosPerRowPortrait="2"/>
