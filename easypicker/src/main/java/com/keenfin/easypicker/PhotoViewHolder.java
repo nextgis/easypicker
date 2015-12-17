@@ -52,8 +52,13 @@ public class PhotoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         parentBox.setLayoutParams(lp);
     }
 
-    public void setPhoto(Bitmap photo) {
+    public void setIcon(Bitmap photo) {
         mPhoto.setImageBitmap(photo);
+    }
+
+    public void loadPhoto(String path, int size) {
+        BitmapWorkerTask task = new BitmapWorkerTask(mPhoto, size > 0 ? size : Constants.REQUIRED_THUMBNAIL_SIZE);
+        task.execute(path);
     }
 
     public void setOnClickListener(IViewHolderClick listener) {

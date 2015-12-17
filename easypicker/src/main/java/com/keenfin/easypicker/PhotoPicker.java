@@ -201,23 +201,7 @@ public class PhotoPicker extends RecyclerView {
         return mPhotoAdapter.getImagesPath();
     }
 
-    public static Bitmap getBitmap(String path, int requiredSize) throws OutOfMemoryError {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(path, options);
-        int scale = 1;
-
-        while (options.outWidth / scale > requiredSize && options.outHeight / scale > requiredSize)
-            scale *= 2;
-
-        options.inSampleSize = scale;
-        options.inJustDecodeBounds = false;
-
-        return BitmapFactory.decodeFile(path, options);
-    }
-
     public class PhotoAdapter extends RecyclerView.Adapter<PhotoViewHolder> implements PhotoViewHolder.IViewHolderClick {
-        private List<Bitmap> mImages;
         private List<String> mImagesPath;
         private Uri mPhotoUri;
 
@@ -228,7 +212,6 @@ public class PhotoPicker extends RecyclerView {
         }
 
         public PhotoAdapter(boolean noControls) {
-            mImages = new ArrayList<>();
             mImagesPath = new ArrayList<>();
             mNoControls = noControls;
 
@@ -237,15 +220,13 @@ public class PhotoPicker extends RecyclerView {
         }
 
         private void addNewPhotoIcon() {
-            mImages.add(0, mNewPhotoIcon);
             mImagesPath.add(0, null);
             notifyItemInserted(0);
         }
 
         protected void replaceNewPhotoIcon(int drawableResourceId) {
-            if (!mNoControls && mImages.size() > 0) {
-                mImages.remove(0);
-                mImages.add(0, BitmapFactory.decodeResource(getResources(), drawableResourceId));
+            if (!mNoControls && mImagesPath.size() > 0) {
+                mNewPhotoIcon = BitmapFactory.decodeResource(getResources(), drawableResourceId);
                 notifyItemChanged(0);
             }
         }
@@ -260,15 +241,19 @@ public class PhotoPicker extends RecyclerView {
         @Override
         public void onBindViewHolder(final PhotoViewHolder holder, final int position) {
             holder.setOnClickListener(this);
-            holder.setPhoto(mImages.get(position));
 
             boolean isControl = position == 0 && !mNoControls;
+            if (isControl)
+                holder.setIcon(mNewPhotoIcon);
+            else
+                holder.loadPhoto(mImagesPath.get(position), mRowHeight);
+
             holder.adjustControl(mRowHeight, mColorPrimary, isControl, mIsOneLine, mNoControls);
         }
 
         @Override
         public int getItemCount() {
-            return mImages.size();
+            return mImagesPath.size();
         }
 
         public ArrayList<String> getImagesPath() {
@@ -353,7 +338,6 @@ public class PhotoPicker extends RecyclerView {
                 if (position <= 0)
                     return;
 
-                mImages.remove(position);
                 mImagesPath.remove(position);
                 notifyItemRemoved(position);
                 measureParent();
@@ -376,16 +360,15 @@ public class PhotoPicker extends RecyclerView {
         }
 
         private boolean addImage(String imagePath) {
-            Bitmap selectedImage = getBitmap(imagePath, Constants.REQUIRED_THUMBNAIL_SIZE);
+            String mimeType = BitmapUtil.getMimeTypeOfFile(imagePath);
 
-            if (selectedImage == null) {
+            if (mimeType == null) {
                 Toast.makeText(mContext, mContext.getString(R.string.photo_fail_attach), Toast.LENGTH_SHORT).show();
                 return false;
             }
 
-            boolean result = mImages.add(selectedImage);
-            result &= mImagesPath.add(imagePath);
-            notifyItemInserted(mImages.size() - 1);
+            boolean result = mImagesPath.add(imagePath);
+            notifyItemInserted(mImagesPath.size() - 1);
             measureParent();
 
             return result;
@@ -393,7 +376,7 @@ public class PhotoPicker extends RecyclerView {
 
         public void measureParent() {
             ViewGroup.LayoutParams params = getLayoutParams();
-            int itemsCount = mIsOneLine ? 1 : mImages.size();
+            int itemsCount = mIsOneLine ? 1 : mImagesPath.size();
             params.height = (int) Math.ceil(1f * itemsCount / mImagesPerRow) * mRowHeight;
             setLayoutParams(params);
         }

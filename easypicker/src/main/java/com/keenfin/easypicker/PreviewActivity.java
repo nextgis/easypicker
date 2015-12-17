@@ -10,7 +10,7 @@ package com.keenfin.easypicker;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -46,7 +46,7 @@ public class PreviewActivity extends AppCompatActivity {
         pager.setCurrentItem(position);
     }
 
-    private static class PreviewAdapter extends FragmentPagerAdapter {
+    private static class PreviewAdapter extends FragmentStatePagerAdapter {
         private List<String> mImages;
 
         public PreviewAdapter(FragmentManager fm, List<String> images) {
@@ -80,7 +80,8 @@ public class PreviewActivity extends AppCompatActivity {
             if (getArguments() != null)
                 imagePath = getArguments().getString(Constants.BUNDLE_ATTACHED_IMAGES);
 
-            view.setImageBitmap(PhotoPicker.getBitmap(imagePath, maxSide));
+            BitmapWorkerTask task = new BitmapWorkerTask(view, maxSide);
+            task.execute(imagePath);
 
             return view;
         }
