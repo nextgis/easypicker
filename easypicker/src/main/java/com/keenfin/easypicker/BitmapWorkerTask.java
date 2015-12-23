@@ -10,6 +10,7 @@ package com.keenfin.easypicker;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 
@@ -33,7 +34,11 @@ public class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
     // Once complete, see if ImageView is still around and set bitmap.
     @Override
     protected void onPostExecute(Bitmap bitmap) {
-        if (mIvReference.get() != null && bitmap != null)
-            mIvReference.get().setImageBitmap(bitmap);
+        if (mIvReference.get() != null) {
+            if (bitmap == null)
+                Toast.makeText(mIvReference.get().getContext(), R.string.null_bitmap, Toast.LENGTH_SHORT).show();
+            else
+                mIvReference.get().setImageBitmap(bitmap);
+        }
     }
 }

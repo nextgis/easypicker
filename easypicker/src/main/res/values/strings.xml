@@ -13,4 +13,5 @@
   <string name="photo_fail_attach">Can\'t attach photo</string>
   <string name="hw_error">Media storage is not available</string>
   <string name="max_photos">Max images is %d</string>
+  <string name="null_bitmap">Can not load specified image</string>
 </resources>

@@ -13,4 +13,5 @@
   <string name="photo_fail_attach">Немагчыма прымацаваць фота</string>
   <string name="hw_error">Памяць прылады часова недаступная</string>
   <string name="max_photos">Максімум %d фота</string>
+  <string name="null_bitmap">Немагчыма загрузіць малюнак</string>
 </resources>

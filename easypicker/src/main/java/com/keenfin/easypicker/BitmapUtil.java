@@ -10,8 +10,13 @@ package com.keenfin.easypicker;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
 public class BitmapUtil {
-    public static Bitmap getBitmap(String path, int requiredSize) throws OutOfMemoryError {
+    // thanks to http://stackoverflow.com/questions/477572/strange-out-of-memory-issue-while-loading-an-image-to-a-bitmap-object
+    public static Bitmap getBitmap(String path, int requiredSize) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(path, options);
@@ -22,8 +27,41 @@ public class BitmapUtil {
 
         options.inSampleSize = scale;
         options.inJustDecodeBounds = false;
+        options.inDither = false;
+        options.inPurgeable = true;
+        options.inInputShareable = true;
+        options.inTempStorage = new byte[32 * 1024];
 
-        return BitmapFactory.decodeFile(path, options);
+        Bitmap result = null;
+        File file = new File(path);
+        FileInputStream fs = null;
+        try {
+            fs = new FileInputStream(file);
+
+            try {
+                result = BitmapFactory.decodeFileDescriptor(fs.getFD(), null, options);
+            } catch (OutOfMemoryError oom) {
+                oom.printStackTrace();
+
+                try {
+                    options.inSampleSize *= 4;
+                    result = BitmapFactory.decodeFileDescriptor(fs.getFD(), null, options);
+                } catch (OutOfMemoryError oom1) {
+                    oom.printStackTrace();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fs != null)
+                try {
+                    fs.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+
+        return result;
     }
 
     // http://stackoverflow.com/a/19739471/2088273

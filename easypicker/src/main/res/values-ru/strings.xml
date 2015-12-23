@@ -13,4 +13,5 @@
     <string name="photo_fail_attach">Невозможно прикрепить фото</string>
     <string name="hw_error">Память устройства временно недоступна</string>
     <string name="max_photos">Максимум %d фото</string>
+    <string name="null_bitmap">Невозможно загрузить изображение</string>
 </resources>

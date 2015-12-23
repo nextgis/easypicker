@@ -13,4 +13,5 @@
   <string name="photo_fail_attach">Błąd dołączania zdjęcia</string>
   <string name="hw_error">Brak miejsca w pamięci telefonu</string>
   <string name="max_photos">Maksymalnie %d zdjęc</string>
+  <string name="null_bitmap">Nie można załadować obrazka</string>
 </resources>

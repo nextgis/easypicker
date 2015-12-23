@@ -7,6 +7,7 @@
 
 package com.keenfin.easypicker;
 
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -70,9 +71,10 @@ public class PreviewActivity extends AppCompatActivity {
     }
 
     public static class PreviewFragment extends Fragment {
+        private ImageView mImage;
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            ImageView view = (ImageView) inflater.inflate(R.layout.preview_item, container, false);
+            mImage = (ImageView) inflater.inflate(R.layout.preview_item, container, false);
             int maxSide = Math.max(getActivity().getWindowManager().getDefaultDisplay().getWidth(),
                     getActivity().getWindowManager().getDefaultDisplay().getHeight());
             String imagePath = null;
@@ -80,10 +82,16 @@ public class PreviewActivity extends AppCompatActivity {
             if (getArguments() != null)
                 imagePath = getArguments().getString(Constants.BUNDLE_ATTACHED_IMAGES);
 
-            BitmapWorkerTask task = new BitmapWorkerTask(view, maxSide);
+            BitmapWorkerTask task = new BitmapWorkerTask(mImage, maxSide);
             task.execute(imagePath);
 
-            return view;
+            return mImage;
+        }
+
+        @Override
+        public void onDestroyView() {
+            super.onDestroyView();
+            ((BitmapDrawable) mImage.getDrawable()).getBitmap().recycle();
         }
     }
 }
