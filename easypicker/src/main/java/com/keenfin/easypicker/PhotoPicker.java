@@ -42,7 +42,7 @@ public class PhotoPicker extends RecyclerView {
     private String mNewPhotosDir = Constants.NEW_PHOTOS_SAVE_DIR;
     private int mColorPrimary, mColorAccent;
     private int mCameraRequest, mPickRequest;
-    private boolean mIsOneLine = false, mIsUsePreview = true;
+    private boolean mIsOneLine = false, mIsUsePreview = true, mDefaultPreview = false;
     private boolean mPrimaryColorDefined, mAccentColorDefined;
 
     private Context mContext;
@@ -109,6 +109,7 @@ public class PhotoPicker extends RecyclerView {
             mColorAccent = getColor(styleable, R.styleable.PhotoPicker_accentColor, R.color.accent);
 
         mIsUsePreview = styleable.getBoolean(R.styleable.PhotoPicker_usePreview, true);
+        mDefaultPreview = styleable.getBoolean(R.styleable.PhotoPicker_previewDefault, false);
         mMaxPhotos = styleable.getInt(R.styleable.PhotoPicker_maxPhotos, mMaxPhotos);
         mNewPhotosDir = styleable.getString(R.styleable.PhotoPicker_newPhotosDirectory);
         mNewPhotosDir = mNewPhotosDir == null ? Constants.NEW_PHOTOS_SAVE_DIR : mNewPhotosDir;
@@ -188,6 +189,10 @@ public class PhotoPicker extends RecyclerView {
 
     public void setUsePreview(boolean usePreview) {
         mIsUsePreview = usePreview;
+    }
+
+    public void setDefaultPreview(boolean defaultPreview) {
+        mDefaultPreview = defaultPreview;
     }
 
     public void setNewPhotosDrawable(int drawableResourceId) {
@@ -325,10 +330,19 @@ public class PhotoPicker extends RecyclerView {
                     if (!mIsUsePreview)
                         return;
 
-                    int offset = mNoControls ? 0 : 1;
-                    Intent preview = new Intent(getContext(), PreviewActivity.class);
-                    preview.putExtra(Constants.BUNDLE_ATTACHED_IMAGES, getImagesPath());
-                    preview.putExtra(Constants.BUNDLE_NEW_PHOTO_PATH, position - offset);
+                    ArrayList<String> imagesPath = getImagesPath();
+                    int offset = position - (mNoControls ? 0 : 1);
+                    Intent preview;
+
+                    if (!mDefaultPreview) {
+                        preview = new Intent(getContext(), PreviewActivity.class);
+                        preview.putExtra(Constants.BUNDLE_ATTACHED_IMAGES, imagesPath);
+                        preview.putExtra(Constants.BUNDLE_NEW_PHOTO_PATH, offset);
+                    } else {
+                        preview = new Intent(Intent.ACTION_VIEW);
+                        preview.setDataAndType(Uri.parse("file://" + imagesPath.get(offset)), "image/*");
+                    }
+
                     getContext().startActivity(preview);
                 }
             } else if (i == R.id.ib_remove) {
