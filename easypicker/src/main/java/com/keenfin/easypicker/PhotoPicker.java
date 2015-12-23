@@ -71,13 +71,7 @@ public class PhotoPicker extends RecyclerView {
 
     private void init(Context context, boolean noControls) {
         mContext = context;
-
-        PhotoAdapter adapter = new PhotoAdapter(noControls);
-        setAdapter(adapter);
-
         mImagesPerRow = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? mImagesPerRowLandscape : mImagesPerRowPortrait;
-        setHasFixedSize(true);
-
         RecyclerView.LayoutManager layoutManager;
 
         if (mIsOneLine)
@@ -94,6 +88,9 @@ public class PhotoPicker extends RecyclerView {
         if (!mAccentColorDefined)
             mColorAccent = getColor(styleable, 1, R.color.accent);
         styleable.recycle();
+
+        PhotoAdapter adapter = new PhotoAdapter(noControls);
+        setAdapter(adapter);
     }
 
     private void init(Context context, AttributeSet attrs) {
