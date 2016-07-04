@@ -1,5 +1,5 @@
 /*
- *           Copyright © 2015 Stanislav Petriakov
+ *           Copyright © 2015-2016 Stanislav Petriakov
  *  Distributed under the Boost Software License, Version 1.0.
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
@@ -7,6 +7,7 @@
 
 package com.keenfin.easypicker;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -91,7 +92,12 @@ public class PreviewActivity extends AppCompatActivity {
         @Override
         public void onDestroyView() {
             super.onDestroyView();
-            ((BitmapDrawable) mImage.getDrawable()).getBitmap().recycle();
+            BitmapDrawable bitmapDrawable = ((BitmapDrawable) mImage.getDrawable());
+            if (bitmapDrawable != null) {
+                Bitmap bitmap = bitmapDrawable.getBitmap();
+                if (bitmap != null)
+                    bitmap.recycle();
+            }
         }
     }
 }
