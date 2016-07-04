@@ -26,6 +26,8 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 
+import java.io.File;
+
 public class FileUtil {
     /**
      * Get a file path from a Uri. This will get the the path for Storage Access
@@ -51,9 +53,23 @@ public class FileUtil {
 
                 if ("primary".equalsIgnoreCase(type)) {
                     return Environment.getExternalStorageDirectory() + "/" + split[1];
-                }
+                } else {
+                    File chooser = new File(Environment.getExternalStorageDirectory() + "/" + split[1]);
+                    if (chooser.exists())
+                        return chooser.getPath();
 
-                // TODO handle non-primary volumes
+                    chooser = new File(System.getenv("EXTERNAL_STORAGE") + "/" + split[1]);
+                    if (chooser.exists())
+                        return chooser.getPath();
+
+                    chooser = new File(System.getenv("SECONDARY_STORAGE") + "/" + split[1]);
+                    if (chooser.exists())
+                        return chooser.getPath();
+
+                    chooser = new File(System.getenv("EXTERNAL_SDCARD_STORAGE") + "/" + split[1]);
+                    if (chooser.exists())
+                        return chooser.getPath();
+                }
             }
             // DownloadsProvider
             else if (isDownloadsDocument(uri)) {
