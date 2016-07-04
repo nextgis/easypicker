@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~           Copyright © 2015 Stanislav Petriakov
+  ~           Copyright © 2015-2016 Stanislav Petriakov
   ~  Distributed under the Boost Software License, Version 1.0.
   ~     (See accompanying file LICENSE_1_0.txt or copy at
   ~           http://www.boost.org/LICENSE_1_0.txt)
   -->
 
 <resources>
+    <color name="background">#77ffffff</color>
     <color name="primary">#eee</color>
     <color name="accent">#555</color>
 </resources>
