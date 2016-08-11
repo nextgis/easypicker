@@ -1,5 +1,5 @@
 /*
- *           Copyright © 2015 Stanislav Petriakov
+ *           Copyright © 2015-2016 Stanislav Petriakov
  *  Distributed under the Boost Software License, Version 1.0.
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
@@ -7,7 +7,7 @@
 
 package com.keenfin.easypicker;
 
-import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageButton;
@@ -52,8 +52,8 @@ public class PhotoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         parentBox.setLayoutParams(lp);
     }
 
-    public void setIcon(Bitmap photo) {
-        mPhoto.setImageBitmap(photo);
+    public void setIcon(Drawable photo) {
+        mPhoto.setImageDrawable(photo);
     }
 
     public void loadPhoto(String path, int size) {

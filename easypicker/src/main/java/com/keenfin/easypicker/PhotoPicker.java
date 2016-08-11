@@ -1,5 +1,5 @@
 /*
- *           Copyright © 2015 Stanislav Petriakov
+ *           Copyright © 2015-2016 Stanislav Petriakov
  *  Distributed under the Boost Software License, Version 1.0.
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
@@ -14,13 +14,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -37,7 +37,6 @@ import java.util.Random;
 
 public class PhotoPicker extends RecyclerView {
     private int mMaxPhotos = -1;
-    private int mRowHeight;
     private int mImagesPerRow, mImagesPerRowPortrait = Constants.IMAGES_PER_ROW_P, mImagesPerRowLandscape = Constants.IMAGES_PER_ROW_L;
     private String mNewPhotosDir = Constants.NEW_PHOTOS_SAVE_DIR;
     private int mColorPrimary, mColorAccent;
@@ -47,7 +46,7 @@ public class PhotoPicker extends RecyclerView {
 
     private Context mContext;
     private PhotoAdapter mPhotoAdapter;
-    private Bitmap mNewPhotoIcon;
+    private Drawable mNewPhotoIcon;
 
     public PhotoPicker(Context context) {
         this(context, false);
@@ -55,7 +54,7 @@ public class PhotoPicker extends RecyclerView {
 
     public PhotoPicker(Context context, boolean noControls) {
         super(context);
-        mNewPhotoIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_add_white_48dp);
+        mNewPhotoIcon = ContextCompat.getDrawable(context, R.drawable.ic_add_white_48dp);
         init(context, noControls);
     }
 
@@ -99,7 +98,7 @@ public class PhotoPicker extends RecyclerView {
         mImagesPerRowPortrait = styleable.getInt(R.styleable.PhotoPicker_photosPerRowPortrait, mImagesPerRowPortrait);
         mIsOneLine = styleable.getBoolean(R.styleable.PhotoPicker_oneLineGallery, false);
         int icon = styleable.getResourceId(R.styleable.PhotoPicker_newPhotosIcon, R.drawable.ic_add_white_48dp);
-        mNewPhotoIcon = BitmapFactory.decodeResource(getResources(), icon);
+        mNewPhotoIcon = ContextCompat.getDrawable(context, icon);
         boolean noControls = styleable.getBoolean(R.styleable.PhotoPicker_noControls, false);
         init(context, noControls);
 
@@ -157,8 +156,6 @@ public class PhotoPicker extends RecyclerView {
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
         super.onMeasure(widthSpec, heightSpec);
-
-        mRowHeight = getMeasuredWidth() / mImagesPerRow;
         mPhotoAdapter.measureParent();
     }
 
@@ -228,7 +225,7 @@ public class PhotoPicker extends RecyclerView {
 
         protected void replaceNewPhotoIcon(int drawableResourceId) {
             if (!mNoControls && mImagesPath.size() > 0) {
-                mNewPhotoIcon = BitmapFactory.decodeResource(getResources(), drawableResourceId);
+                mNewPhotoIcon = ContextCompat.getDrawable(mContext, drawableResourceId);
                 notifyItemChanged(0);
             }
         }
@@ -248,9 +245,9 @@ public class PhotoPicker extends RecyclerView {
             if (isControl)
                 holder.setIcon(mNewPhotoIcon);
             else
-                holder.loadPhoto(mImagesPath.get(position), mRowHeight);
+                holder.loadPhoto(mImagesPath.get(position), getMeasuredWidth() / mImagesPerRow);
 
-            holder.adjustControl(mRowHeight, mColorPrimary, isControl, mIsOneLine, mNoControls);
+            holder.adjustControl(getMeasuredWidth() / mImagesPerRow, mColorPrimary, isControl, mIsOneLine, mNoControls);
         }
 
         @Override
@@ -388,7 +385,7 @@ public class PhotoPicker extends RecyclerView {
         public void measureParent() {
             ViewGroup.LayoutParams params = getLayoutParams();
             int itemsCount = mIsOneLine ? 1 : mImagesPath.size();
-            params.height = (int) Math.ceil(1f * itemsCount / mImagesPerRow) * mRowHeight;
+            params.height = (int) Math.ceil(1f * itemsCount / mImagesPerRow) * getMeasuredWidth() / mImagesPerRow;
             setLayoutParams(params);
         }
     }
