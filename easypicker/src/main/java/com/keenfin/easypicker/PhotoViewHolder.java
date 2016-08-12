@@ -41,6 +41,7 @@ public class PhotoViewHolder extends RecyclerView.ViewHolder implements View.OnC
             lp.setMargins(side / 4, side / 4, side / 4, side / 4);
             mPhotoRemove.setVisibility(View.GONE);
             mPhoto.setColorFilter(color);
+            mPhoto.setScaleType(ImageView.ScaleType.FIT_CENTER);
         } else {
             lp.height = lp.width = side - lp.leftMargin - lp.rightMargin;
             mPhotoRemove.setColorFilter(color);
