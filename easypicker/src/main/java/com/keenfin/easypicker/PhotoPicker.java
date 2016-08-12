@@ -156,7 +156,8 @@ public class PhotoPicker extends RecyclerView {
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
         super.onMeasure(widthSpec, heightSpec);
-        mPhotoAdapter.measureParent();
+        if (!isInEditMode())
+            mPhotoAdapter.measureParent();
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -165,10 +166,13 @@ public class PhotoPicker extends RecyclerView {
 
     @Override
     public void setAdapter(Adapter adapter) {
-        if (!(adapter instanceof PhotoAdapter))
-            throw new IllegalArgumentException("You should not pass adapter to PhotoPicker. It uses specific one.");
+        if (!isInEditMode()) {
+            if (!(adapter instanceof PhotoAdapter))
+                throw new IllegalArgumentException("You should not pass adapter to PhotoPicker. It uses specific one.");
 
-        mPhotoAdapter = (PhotoAdapter) adapter;
+            mPhotoAdapter = (PhotoAdapter) adapter;
+        }
+
         super.setAdapter(adapter);
     }
 
