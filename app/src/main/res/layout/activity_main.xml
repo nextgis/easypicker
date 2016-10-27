@@ -1,5 +1,5 @@
 <!--
-  ~           Copyright © 2015 Stanislav Petriakov
+  ~           Copyright © 2015-2016 Stanislav Petriakov
   ~  Distributed under the Boost Software License, Version 1.0.
   ~     (See accompanying file LICENSE_1_0.txt or copy at
   ~           http://www.boost.org/LICENSE_1_0.txt)
@@ -28,7 +28,7 @@
             easypicker:maxPhotos="5"
             easypicker:newPhotosDirectory="YourAppName"
             easypicker:oneLineGallery="true"
-            easypicker:usePreview="false"/>
+            easypicker:previewDefault="true"/>
 
         <com.keenfin.easypicker.PhotoPicker
             android:id="@+id/pp_easypicker_grid"
@@ -41,7 +41,8 @@
             easypicker:newPhotosIcon="@android:drawable/ic_menu_add"
             easypicker:photosPerRowLandscape="8"
             easypicker:photosPerRowPortrait="5"
-            easypicker:primaryColor="@color/accent"/>
+            easypicker:primaryColor="@color/accent"
+            easypicker:usePreview="false"/>
 
         <com.keenfin.easypicker.PhotoPicker
             android:id="@+id/pp_easypicker_grid_no_controls"
