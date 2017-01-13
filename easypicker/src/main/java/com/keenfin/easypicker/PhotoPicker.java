@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -84,7 +85,7 @@ public class PhotoPicker extends RecyclerView {
 
         setLayoutManager(layoutManager);
 
-        int[] attrs = new int[] { R.attr.colorPrimary, R.attr.colorAccent };
+        int[] attrs = new int[]{R.attr.colorPrimary, R.attr.colorAccent};
         TypedArray styleable = context.obtainStyledAttributes(attrs);
         if (!mPrimaryColorDefined)
             mColorPrimary = getColor(styleable, 0, R.color.primary);
@@ -367,13 +368,17 @@ public class PhotoPicker extends RecyclerView {
             }
         }
 
-        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        void onActivityResult(int requestCode, int resultCode, Intent data) {
             if (resultCode == Activity.RESULT_OK) {
                 String selectedImagePath;
 
-                if (requestCode == mCameraRequest)
+                if (requestCode == mCameraRequest) {
                     selectedImagePath = mPhotoUri.getPath();
-                else if (requestCode == mPickRequest)
+                    MediaScannerConnection.scanFile(mContext, new String[]{mPhotoUri.getPath()}, null,
+                                                    new MediaScannerConnection.OnScanCompletedListener() {
+                                                        public void onScanCompleted(String path, Uri uri) {}
+                                                    });
+                } else if (requestCode == mPickRequest)
                     selectedImagePath = FileUtil.getPath(mContext, data.getData());
                 else
                     return;
@@ -397,7 +402,7 @@ public class PhotoPicker extends RecyclerView {
             return result;
         }
 
-        public void measureParent() {
+        void measureParent() {
             ViewGroup.LayoutParams params = getLayoutParams();
             int itemsCount = mIsOneLine ? 1 : mImagesPath.size();
             params.height = (int) Math.ceil(1f * itemsCount / mImagesPerRow) * getMeasuredWidth() / mImagesPerRow;
