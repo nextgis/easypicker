@@ -1,19 +1,28 @@
 <!--
-  ~           Copyright © 2015 Stanislav Petriakov
+  ~           Copyright © 2015,2017 Stanislav Petriakov
   ~  Distributed under the Boost Software License, Version 1.0.
   ~     (See accompanying file LICENSE_1_0.txt or copy at
   ~           http://www.boost.org/LICENSE_1_0.txt)
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.keenfin.easypicker">
+<manifest package="com.keenfin.easypicker"
+          xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application android:allowBackup="true">
         <activity
             android:name=".PreviewActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
+            android:theme="@style/Theme.AppCompat.NoActionBar"/>
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.keenfin.easypicker.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"/>
+        </provider>
     </application>
 
 </manifest>

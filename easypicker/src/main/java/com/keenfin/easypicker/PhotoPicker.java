@@ -1,5 +1,5 @@
 /*
- *           Copyright © 2015-2016 Stanislav Petriakov
+ *           Copyright © 2015-2017 Stanislav Petriakov
  *  Distributed under the Boost Software License, Version 1.0.
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
@@ -16,11 +16,13 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,6 +45,7 @@ public class PhotoPicker extends RecyclerView {
     private int mCameraRequest, mPickRequest;
     private boolean mIsOneLine = false, mIsUsePreview = true, mDefaultPreview = false;
     private boolean mPrimaryColorDefined, mAccentColorDefined;
+    boolean mIsNougat;
 
     private Context mContext;
     private PhotoAdapter mPhotoAdapter;
@@ -69,6 +72,7 @@ public class PhotoPicker extends RecyclerView {
     }
 
     private void init(Context context, boolean noControls) {
+        mIsNougat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N;
         mContext = context;
         mImagesPerRow = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? mImagesPerRowLandscape : mImagesPerRowPortrait;
         RecyclerView.LayoutManager layoutManager;
@@ -312,7 +316,8 @@ public class PhotoPicker extends RecyclerView {
 
                                     photo = new File(photo, System.currentTimeMillis() + ".jpg");
                                     mPhotoUri = Uri.fromFile(photo);
-                                    intent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri);
+                                    Uri uri = mIsNougat ? FileProvider.getUriForFile(mContext, Constants.AUTHORITY, photo) : mPhotoUri;
+                                    intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
                                     mCameraRequest = randomizeRequest.nextInt(0xffff);
                                     ((Activity) mContext).startActivityForResult(intent, mCameraRequest);
                                     break;
@@ -341,7 +346,13 @@ public class PhotoPicker extends RecyclerView {
                         preview.putExtra(Constants.BUNDLE_NEW_PHOTO_PATH, offset);
                     } else {
                         preview = new Intent(Intent.ACTION_VIEW);
-                        preview.setDataAndType(Uri.parse("file://" + imagesPath.get(offset)), "image/*");
+
+                        if (mIsNougat) {
+                            File path = new File(imagesPath.get(offset));
+                            preview.setDataAndType(FileProvider.getUriForFile(mContext, Constants.AUTHORITY, path), "image/*");
+                            preview.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        } else
+                            preview.setDataAndType(Uri.parse("file://" + imagesPath.get(offset)), "image/*");
                     }
 
                     getContext().startActivity(preview);
