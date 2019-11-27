@@ -20,7 +20,7 @@ ext {
     siteUrl = 'https://github.com/4eRTuk/easypicker'
     gitUrl = 'https://github.com/4eRTuk/easypicker.git'
 
-    libraryVersion = '0.2.11'
+    libraryVersion = '0.2.13'
 
     developerId = '4ert'
     developerName = 'Stanislav Petriakov'
@@ -36,10 +36,10 @@ android {
     buildToolsVersion "28.0.3"
 
     defaultConfig {
-        minSdkVersion 9
-        targetSdkVersion 25
-        versionCode 14
-        versionName "0.2.11"
+        minSdkVersion 14
+        targetSdkVersion 28
+        versionCode 16
+        versionName "0.2.13"
     }
     buildTypes {
         release {
