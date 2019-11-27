@@ -1,5 +1,5 @@
 /*
- *           Copyright © 2015-2016 Stanislav Petriakov
+ *           Copyright © 2015-2016, 2019 Stanislav Petriakov
  *  Distributed under the Boost Software License, Version 1.0.
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
@@ -24,9 +24,9 @@ public class PhotoViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     public PhotoViewHolder(View itemView) {
         super(itemView);
-        mPhotoRemove = (ImageButton) itemView.findViewById(R.id.ib_remove);
+        mPhotoRemove = itemView.findViewById(R.id.ib_remove);
         mPhotoRemove.setOnClickListener(this);
-        mPhoto = (ImageView) itemView.findViewById(R.id.iv_photo);
+        mPhoto = itemView.findViewById(R.id.iv_photo);
         mPhoto.setOnClickListener(this);
     }
 

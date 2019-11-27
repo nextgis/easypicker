@@ -1,5 +1,5 @@
 /*
- *           Copyright © 2015-2017 Stanislav Petriakov
+ *           Copyright © 2015-2017, 2019 Stanislav Petriakov
  *  Distributed under the Boost Software License, Version 1.0.
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.GridLayoutManager;
@@ -120,7 +121,6 @@ public class PhotoPicker extends RecyclerView {
         styleable.recycle();
     }
 
-    @SuppressWarnings("deprecation")
     private int getColor(TypedArray array, int index, int defValue) {
         return array.getColor(index, mContext.getResources().getColor(defValue));
     }
@@ -147,7 +147,10 @@ public class PhotoPicker extends RecyclerView {
             if (bundle.containsKey(Constants.BUNDLE_NEW_PHOTO_PATH))
                 mPhotoAdapter.setPhotoUri(Uri.parse(bundle.getString(Constants.BUNDLE_NEW_PHOTO_PATH)));
 
-            mPhotoAdapter.restoreImages(bundle.getStringArrayList(Constants.BUNDLE_ATTACHED_IMAGES));
+            List<String> images = bundle.getStringArrayList(Constants.BUNDLE_ATTACHED_IMAGES);
+            if (images == null)
+                images = new ArrayList<>();
+            mPhotoAdapter.restoreImages(images);
             mCameraRequest = bundle.getInt(Constants.BUNDLE_CAMERA_REQUEST);
             mPickRequest = bundle.getInt(Constants.BUNDLE_PICK_REQUEST);
 
@@ -213,7 +216,7 @@ public class PhotoPicker extends RecyclerView {
         private List<String> mImagesPath;
         private Uri mPhotoUri;
 
-        private boolean mNoControls = false;
+        private boolean mNoControls;
 
         public PhotoAdapter() {
             this(false);
@@ -239,8 +242,9 @@ public class PhotoPicker extends RecyclerView {
             }
         }
 
+        @NonNull
         @Override
-        public PhotoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public PhotoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.photo_item, parent, false);
             view.setBackgroundColor(mColorAccent);
             return new PhotoViewHolder(view);
@@ -265,8 +269,7 @@ public class PhotoPicker extends RecyclerView {
         }
 
         public ArrayList<String> getImagesPath() {
-            ArrayList<String> images = new ArrayList<>();
-            images.addAll(mImagesPath);
+            ArrayList<String> images = new ArrayList<>(mImagesPath);
 
             if (!mNoControls)
                 images.remove(0);
@@ -317,7 +320,7 @@ public class PhotoPicker extends RecyclerView {
 
                                     photo = new File(photo, System.currentTimeMillis() + ".jpg");
                                     mPhotoUri = Uri.fromFile(photo);
-                                    Uri uri = mIsNougat ? FileProvider.getUriForFile(mContext, Constants.AUTHORITY, photo) : mPhotoUri;
+                                    Uri uri = mIsNougat ? FileProvider.getUriForFile(mContext, getUriProviderAuthority(getContext()), photo) : mPhotoUri;
                                     intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
                                     mCameraRequest = randomizeRequest.nextInt(0xffff);
                                     ((Activity) mContext).startActivityForResult(intent, mCameraRequest);
@@ -350,7 +353,7 @@ public class PhotoPicker extends RecyclerView {
 
                         if (mIsNougat) {
                             File path = new File(imagesPath.get(offset));
-                            preview.setDataAndType(FileProvider.getUriForFile(mContext, Constants.AUTHORITY, path), "image/*");
+                            preview.setDataAndType(FileProvider.getUriForFile(mContext, getUriProviderAuthority(getContext()), path), "image/*");
                             preview.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         } else
                             preview.setDataAndType(Uri.parse("file://" + imagesPath.get(offset)), "image/*");
@@ -379,7 +382,7 @@ public class PhotoPicker extends RecyclerView {
                                                         public void onScanCompleted(String path, Uri uri) {}
                                                     });
                 } else if (requestCode == mPickRequest)
-                    selectedImagePath = FileUtil.getPath(mContext, data.getData());
+                    selectedImagePath = FileUtil.getRealPath(mContext, data.getData());
                 else
                     return;
 
@@ -408,5 +411,9 @@ public class PhotoPicker extends RecyclerView {
             params.height = (int) Math.ceil(1f * itemsCount / mImagesPerRow) * getMeasuredWidth() / mImagesPerRow;
             setLayoutParams(params);
         }
+    }
+
+    public static String getUriProviderAuthority(Context context) {
+        return context.getPackageName() + ".easypicker.provider";
     }
 }

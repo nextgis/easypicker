@@ -1,5 +1,5 @@
 /*
- *           Copyright © 2015-2016 Stanislav Petriakov
+ *           Copyright © 2015-2016, 2019 Stanislav Petriakov
  *  Distributed under the Boost Software License, Version 1.0.
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
@@ -18,7 +18,6 @@ import java.io.IOException;
 
 public class BitmapUtil {
     // thanks to http://stackoverflow.com/questions/477572/strange-out-of-memory-issue-while-loading-an-image-to-a-bitmap-object
-    @SuppressWarnings("deprecation")
     public static Bitmap getBitmap(String path, int requiredSize) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
@@ -64,7 +63,7 @@ public class BitmapUtil {
                 }
         }
 
-        ExifInterface exif = null;
+        ExifInterface exif;
         int orientation = ExifInterface.ORIENTATION_NORMAL;
         try {
             exif = new ExifInterface(path);

@@ -16,7 +16,6 @@
 
 package com.keenfin.easypicker;
 
-import android.annotation.TargetApi;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
@@ -25,10 +24,41 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
+import android.support.v4.content.CursorLoader;
+import android.text.TextUtils;
 
-import java.io.File;
-
+// https://gist.github.com/chenenyu/3ee568fa326e2f0a9ff6674ec76eb785
 public class FileUtil {
+    public static String getRealPath(Context context, Uri fileUri) {
+        String realPath;
+        // SDK >= 11 && SDK < 19
+        if (Build.VERSION.SDK_INT < 19) {
+            realPath = getRealPathFromURI_API11to18(context, fileUri);
+        }
+        // SDK > 19 (Android 4.4) and up
+        else {
+            realPath = getRealPathFromURI_API19(context, fileUri);
+        }
+        return realPath;
+    }
+
+    public static String getRealPathFromURI_API11to18(Context context, Uri contentUri) {
+        String[] proj = {MediaStore.MediaColumns.DATA};
+        String result = null;
+
+        CursorLoader cursorLoader = new CursorLoader(context, contentUri, proj, null, null, null);
+        Cursor cursor = cursorLoader.loadInBackground();
+
+        if (cursor != null) {
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+            cursor.moveToFirst();
+            result = cursor.getString(column_index);
+            cursor.close();
+        }
+        return result;
+    }
+
     /**
      * Get a file path from a Uri. This will get the the path for Storage Access
      * Framework Documents, as well as the _data field for the MediaStore and
@@ -36,15 +66,11 @@ public class FileUtil {
      *
      * @param context The context.
      * @param uri     The Uri to query.
-     * @author paulburke
      */
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    public static String getPath(final Context context, final Uri uri) {
-
-        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public static String getRealPathFromURI_API19(final Context context, final Uri uri) {
         // DocumentProvider
-        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+        if (DocumentsContract.isDocumentUri(context, uri)) {
             // ExternalStorageProvider
             if (isExternalStorageDocument(uri)) {
                 final String docId = DocumentsContract.getDocumentId(uri);
@@ -53,32 +79,28 @@ public class FileUtil {
 
                 if ("primary".equalsIgnoreCase(type)) {
                     return Environment.getExternalStorageDirectory() + "/" + split[1];
-                } else {
-                    File chooser = new File(Environment.getExternalStorageDirectory() + "/" + split[1]);
-                    if (chooser.exists())
-                        return chooser.getPath();
-
-                    chooser = new File(System.getenv("EXTERNAL_STORAGE") + "/" + split[1]);
-                    if (chooser.exists())
-                        return chooser.getPath();
-
-                    chooser = new File(System.getenv("SECONDARY_STORAGE") + "/" + split[1]);
-                    if (chooser.exists())
-                        return chooser.getPath();
-
-                    chooser = new File(System.getenv("EXTERNAL_SDCARD_STORAGE") + "/" + split[1]);
-                    if (chooser.exists())
-                        return chooser.getPath();
                 }
+                // non-primary
             }
             // DownloadsProvider
             else if (isDownloadsDocument(uri)) {
 
                 final String id = DocumentsContract.getDocumentId(uri);
-                final Uri contentUri = ContentUris.withAppendedId(
-                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
 
-                return getDataColumn(context, contentUri, null, null);
+                if (!TextUtils.isEmpty(id)) {
+                    if (id.startsWith("raw:")) {
+                        return id.replaceFirst("raw:", "");
+                    }
+                    try {
+                        final Uri contentUri = ContentUris.withAppendedId(
+                                Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+
+                        return getDataColumn(context, contentUri, null, null);
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
             }
             // MediaProvider
             else if (isMediaDocument(uri)) {
@@ -96,15 +118,18 @@ public class FileUtil {
                 }
 
                 final String selection = "_id=?";
-                final String[] selectionArgs = new String[]{
-                        split[1]
-                };
+                final String[] selectionArgs = new String[]{split[1]};
 
                 return getDataColumn(context, contentUri, selection, selectionArgs);
             }
         }
         // MediaStore (and general)
         else if ("content".equalsIgnoreCase(uri.getScheme())) {
+
+            // Return the remote address
+            if (isGooglePhotosUri(uri))
+                return uri.getLastPathSegment();
+
             return getDataColumn(context, uri, null, null);
         }
         // File
@@ -125,21 +150,19 @@ public class FileUtil {
      * @param selectionArgs (Optional) Selection arguments used in the query.
      * @return The value of the _data column, which is typically a file path.
      */
-    public static String getDataColumn(Context context, Uri uri, String selection,
-                                       String[] selectionArgs) {
+    private static String getDataColumn(Context context, Uri uri, String selection,
+                                        String[] selectionArgs) {
 
         Cursor cursor = null;
-        final String column = "_data";
-        final String[] projection = {
-                column
-        };
+        final String column = MediaStore.MediaColumns.DATA;
+        final String[] projection = {column};
 
         try {
             cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
                     null);
             if (cursor != null && cursor.moveToFirst()) {
-                final int column_index = cursor.getColumnIndexOrThrow(column);
-                return cursor.getString(column_index);
+                final int index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(index);
             }
         } finally {
             if (cursor != null)
@@ -153,7 +176,7 @@ public class FileUtil {
      * @param uri The Uri to check.
      * @return Whether the Uri authority is ExternalStorageProvider.
      */
-    public static boolean isExternalStorageDocument(Uri uri) {
+    private static boolean isExternalStorageDocument(Uri uri) {
         return "com.android.externalstorage.documents".equals(uri.getAuthority());
     }
 
@@ -161,7 +184,7 @@ public class FileUtil {
      * @param uri The Uri to check.
      * @return Whether the Uri authority is DownloadsProvider.
      */
-    public static boolean isDownloadsDocument(Uri uri) {
+    private static boolean isDownloadsDocument(Uri uri) {
         return "com.android.providers.downloads.documents".equals(uri.getAuthority());
     }
 
@@ -169,7 +192,15 @@ public class FileUtil {
      * @param uri The Uri to check.
      * @return Whether the Uri authority is MediaProvider.
      */
-    public static boolean isMediaDocument(Uri uri) {
+    private static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is Google Photos.
+     */
+    private static boolean isGooglePhotosUri(Uri uri) {
+        return "com.google.android.apps.photos.content".equals(uri.getAuthority());
     }
 }

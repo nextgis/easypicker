@@ -17,6 +17,4 @@ interface Constants {
     String BUNDLE_CAMERA_REQUEST = "camera_request";
     String BUNDLE_PICK_REQUEST = "pick_request";
     String NEW_PHOTOS_SAVE_DIR = "EasyPicker";
-
-    String AUTHORITY = "com.keenfin.easypicker.provider";
 }

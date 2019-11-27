@@ -1,5 +1,5 @@
 /*
- *           Copyright © 2015-2016 Stanislav Petriakov
+ *           Copyright © 2015-2016, 2019 Stanislav Petriakov
  *  Distributed under the Boost Software License, Version 1.0.
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
@@ -43,7 +43,7 @@ public class PreviewActivity extends AppCompatActivity {
             mImages = new ArrayList<>();
 
         PreviewAdapter adapter = new PreviewAdapter(getSupportFragmentManager(), mImages);
-        ViewPager pager = (ViewPager) findViewById(R.id.vp_photos);
+        ViewPager pager = findViewById(R.id.vp_photos);
         pager.setAdapter(adapter);
         pager.setCurrentItem(position);
     }
@@ -76,15 +76,18 @@ public class PreviewActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             mImage = (ImageView) inflater.inflate(R.layout.preview_item, container, false);
-            int maxSide = Math.max(getActivity().getWindowManager().getDefaultDisplay().getWidth(),
-                    getActivity().getWindowManager().getDefaultDisplay().getHeight());
-            String imagePath = null;
 
-            if (getArguments() != null)
-                imagePath = getArguments().getString(Constants.BUNDLE_ATTACHED_IMAGES);
+            if (getActivity() != null) {
+                int maxSide = Math.max(getActivity().getWindowManager().getDefaultDisplay().getWidth(),
+                        getActivity().getWindowManager().getDefaultDisplay().getHeight());
+                String imagePath = null;
 
-            BitmapWorkerTask task = new BitmapWorkerTask(mImage, maxSide);
-            task.execute(imagePath);
+                if (getArguments() != null)
+                    imagePath = getArguments().getString(Constants.BUNDLE_ATTACHED_IMAGES);
+
+                BitmapWorkerTask task = new BitmapWorkerTask(mImage, maxSide);
+                task.execute(imagePath);
+            }
 
             return mImage;
         }
