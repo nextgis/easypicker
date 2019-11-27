@@ -35,9 +35,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mPhotoPickerStrip = (PhotoPicker) findViewById(R.id.pp_easypicker_strip);
-        mPhotoPickerGrid = (PhotoPicker) findViewById(R.id.pp_easypicker_grid);
-        mPhotoPickerGridNoControls = (PhotoPicker) findViewById(R.id.pp_easypicker_grid_no_controls);
+        mPhotoPickerStrip = findViewById(R.id.pp_easypicker_strip);
+        mPhotoPickerGrid = findViewById(R.id.pp_easypicker_grid);
+        mPhotoPickerGridNoControls = findViewById(R.id.pp_easypicker_grid_no_controls);
 
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
