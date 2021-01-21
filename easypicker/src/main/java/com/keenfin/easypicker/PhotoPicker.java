@@ -1,5 +1,5 @@
 /*
- *           Copyright © 2015-2017, 2019 Stanislav Petriakov
+ *           Copyright © 2015-2017, 2019, 2021 Stanislav Petriakov
  *  Distributed under the Boost Software License, Version 1.0.
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
@@ -314,8 +314,14 @@ public class PhotoPicker extends RecyclerView {
                                             Environment.DIRECTORY_DCIM), mNewPhotosDir);
 
                                     if (!photo.mkdirs() && !photo.exists()) {
-                                        Toast.makeText(mContext, R.string.hw_error, Toast.LENGTH_SHORT).show();
-                                        return;
+                                        photo = new File(mContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES), mNewPhotosDir);
+                                        if (!photo.mkdirs() && !photo.exists()) {
+                                            photo = mContext.getDir(mNewPhotosDir, 0);
+                                            if (!photo.mkdirs() && !photo.exists()) {
+                                                Toast.makeText(mContext, R.string.hw_error, Toast.LENGTH_SHORT).show();
+                                                return;
+                                            }
+                                        }
                                     }
 
                                     photo = new File(photo, System.currentTimeMillis() + ".jpg");
