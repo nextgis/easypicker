@@ -397,9 +397,7 @@ public class PhotoPicker extends RecyclerView {
         }
 
         private boolean addImage(String imagePath) {
-            String mimeType = BitmapUtil.getMimeTypeOfFile(imagePath);
-
-            if (mimeType == null) {
+            if (imagePath == null) {
                 Toast.makeText(mContext, mContext.getString(R.string.photo_fail_attach), Toast.LENGTH_SHORT).show();
                 return false;
             }
