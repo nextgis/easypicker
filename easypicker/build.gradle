@@ -6,6 +6,8 @@
  */
 
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+group='com.github.4eRTuk'
 
 ext {
     bintrayRepo = 'maven'
@@ -20,7 +22,7 @@ ext {
     siteUrl = 'https://github.com/4eRTuk/easypicker'
     gitUrl = 'https://github.com/4eRTuk/easypicker.git'
 
-    libraryVersion = '0.2.14'
+    libraryVersion = '0.2.15'
 
     developerId = '4ert'
     developerName = 'Stanislav Petriakov'
@@ -38,8 +40,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode 17
-        versionName "0.2.14"
+        versionCode 18
+        versionName "0.2.15"
     }
     buildTypes {
         release {
