@@ -328,6 +328,7 @@ public class PhotoPicker extends RecyclerView {
                                     mPhotoUri = Uri.fromFile(photo);
                                     Uri uri = mIsNougat ? FileProvider.getUriForFile(mContext, getUriProviderAuthority(getContext()), photo) : mPhotoUri;
                                     intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                                    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                                     mCameraRequest = randomizeRequest.nextInt(0xffff);
                                     ((Activity) mContext).startActivityForResult(intent, mCameraRequest);
                                     break;
