@@ -1,5 +1,5 @@
 /*
- *           Copyright © 2015-2017 Stanislav Petriakov
+ *           Copyright © 2015-2017б 2019, 2021 Stanislav Petriakov
  *  Distributed under the Boost Software License, Version 1.0.
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
@@ -8,13 +8,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion "28.0.3"
+    compileSdkVersion 30
 
     defaultConfig {
         applicationId "com.keenfin.easypickerdemo"
         minSdkVersion 14
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
     }

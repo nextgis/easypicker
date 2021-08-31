@@ -1,5 +1,5 @@
 <!--
-  ~           Copyright © 2015 Stanislav Petriakov
+  ~           Copyright © 2015, 2021 Stanislav Petriakov
   ~  Distributed under the Boost Software License, Version 1.0.
   ~     (See accompanying file LICENSE_1_0.txt or copy at
   ~           http://www.boost.org/LICENSE_1_0.txt)
@@ -14,4 +14,6 @@
   <string name="hw_error">Brak miejsca w pamięci telefonu</string>
   <string name="max_photos">Maksymalnie %d zdjęc</string>
   <string name="null_bitmap">Nie można załadować obrazka</string>
+  <string name="manage_all_files">All files access</string>
+  <string name="manage_all_files_message">App needs access to all files to select files from any directory on this device.</string>
 </resources>

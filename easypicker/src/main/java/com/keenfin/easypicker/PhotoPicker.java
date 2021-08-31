@@ -23,6 +23,7 @@ import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.GridLayoutManager;
@@ -39,12 +40,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION;
+
 public class PhotoPicker extends RecyclerView {
     private int mMaxPhotos = -1;
     private int mImagesPerRow, mImagesPerRowPortrait = Constants.IMAGES_PER_ROW_P, mImagesPerRowLandscape = Constants.IMAGES_PER_ROW_L;
     private String mNewPhotosDir = Constants.NEW_PHOTOS_SAVE_DIR;
     private int mColorPrimary, mColorAccent;
     private int mCameraRequest, mPickRequest;
+    private final int mPermissionRequest = 936;
     private boolean mIsOneLine = false, mIsUsePreview = true, mDefaultPreview = false;
     private boolean mPrimaryColorDefined, mAccentColorDefined;
     boolean mIsNougat;
@@ -292,12 +296,39 @@ public class PhotoPicker extends RecyclerView {
 
         @Override
         public void onItemClick(View caller, int position) {
-            int i = caller.getId();
-            if (i == R.id.iv_photo) {
+            onItemClick(caller.getId(), position);
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.R)
+        private void askForPermission() {
+            String message = mContext.getString(R.string.manage_all_files_message);
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setTitle(R.string.manage_all_files)
+                   .setMessage(message)
+                   .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                       @Override
+                       public void onClick(DialogInterface dialogInterface, int i) {
+                           Intent permission = new Intent(ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                           ((Activity) mContext).startActivityForResult(permission, mPermissionRequest);
+                       }
+                   })
+                   .setNegativeButton(android.R.string.cancel, null)
+                   .show();
+        }
+
+        private void onItemClick(int id, int position) {
+            if (id == R.id.iv_photo) {
                 if (position == 0 && !mNoControls) {
                     if (mMaxPhotos > -1 && getItemCount() - 1 >= mMaxPhotos) {
                         Toast.makeText(mContext, String.format(mContext.getString(R.string.max_photos), mMaxPhotos), Toast.LENGTH_SHORT).show();
                         return;
+                    }
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        if (!Environment.isExternalStorageManager()) {
+                            askForPermission();
+                            return;
+                        }
                     }
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -368,7 +399,7 @@ public class PhotoPicker extends RecyclerView {
 
                     getContext().startActivity(preview);
                 }
-            } else if (i == R.id.ib_remove) {
+            } else if (id == R.id.ib_remove) {
                 if (position <= 0)
                     return;
 
@@ -388,10 +419,12 @@ public class PhotoPicker extends RecyclerView {
                                                     new MediaScannerConnection.OnScanCompletedListener() {
                                                         public void onScanCompleted(String path, Uri uri) {}
                                                     });
-                } else if (requestCode == mPickRequest)
+                } else if (requestCode == mPickRequest) {
                     selectedImagePath = FileUtil.getRealPath(mContext, data.getData());
-                else
+                } else if (requestCode == mPermissionRequest) {
+                    onItemClick(R.id.iv_photo, 0);
                     return;
+                } else {return;}
 
                 addImage(selectedImagePath);
             }

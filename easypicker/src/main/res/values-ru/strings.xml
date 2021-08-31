@@ -1,5 +1,5 @@
 <!--
-  ~           Copyright © 2015 Stanislav Petriakov
+  ~           Copyright © 2015, 2021 Stanislav Petriakov
   ~  Distributed under the Boost Software License, Version 1.0.
   ~     (See accompanying file LICENSE_1_0.txt or copy at
   ~           http://www.boost.org/LICENSE_1_0.txt)
@@ -14,4 +14,6 @@
     <string name="hw_error">Память устройства временно недоступна</string>
     <string name="max_photos">Максимум %d фото</string>
     <string name="null_bitmap">Невозможно загрузить изображение</string>
+    <string name="manage_all_files">Доступ ко всем файлам</string>
+    <string name="manage_all_files_message">Чтобы в приложении можно было выбирать файлы из любых директорий, нужно предоставить разрешение ко всем файлам.</string>
 </resources>
