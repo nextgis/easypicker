@@ -12,7 +12,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -21,6 +23,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
 import com.keenfin.easypicker.PhotoPicker;
 
@@ -40,11 +43,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mPhotoPickerGridNoControls = findViewById(R.id.pp_easypicker_grid_no_controls);
 
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                Toast.makeText(this, R.string.manage_all_files, Toast.LENGTH_LONG).show();
+                return;
+            }
+        } else if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
-        } else {
-            if (savedInstanceState == null)
-                getSupportLoaderManager().initLoader(0, null, this);
+            return;
+        }
+        if (savedInstanceState == null) {
+            getSupportLoaderManager().initLoader(0, null, this);
         }
     }
 
