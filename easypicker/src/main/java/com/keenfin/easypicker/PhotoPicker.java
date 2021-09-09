@@ -326,7 +326,8 @@ public class PhotoPicker extends RecyclerView {
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         if (!Environment.isExternalStorageManager()) {
-                            askForPermission();
+                            Toast.makeText(mContext, R.string.manage_all_files_message, Toast.LENGTH_LONG).show();
+//                            askForPermission();
                             return;
                         }
                     }
