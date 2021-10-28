@@ -1,5 +1,5 @@
 /*
- *           Copyright © 2015-2016, 2019 Stanislav Petriakov
+ *           Copyright © 2015-2016, 2019, 2021 Stanislav Petriakov
  *  Distributed under the Boost Software License, Version 1.0.
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
@@ -7,13 +7,21 @@
 
 package com.keenfin.easypicker;
 
+import android.content.ContentResolver;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.net.Uri;
+import android.os.Build;
+import android.os.ParcelFileDescriptor;
+import android.support.annotation.RequiresApi;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class BitmapUtil {
@@ -75,6 +83,43 @@ public class BitmapUtil {
         return rotateBitmap(result, orientation);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public static Bitmap getBitmap(FileDescriptor fd) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        options.inSampleSize = 3;
+        options.inJustDecodeBounds = false;
+        options.inDither = false;
+        options.inPurgeable = true;
+        options.inInputShareable = true;
+        options.inTempStorage = new byte[32 * 1024];
+
+        Bitmap result = null;
+        try {
+            result = BitmapFactory.decodeFileDescriptor(fd, null, options);
+        } catch (OutOfMemoryError oom) {
+            oom.printStackTrace();
+
+            try {
+                options.inSampleSize *= 4;
+                result = BitmapFactory.decodeFileDescriptor(fd, null, options);
+            } catch (OutOfMemoryError oom1) {
+                oom.printStackTrace();
+            }
+        }
+
+        ExifInterface exif;
+        int orientation = ExifInterface.ORIENTATION_NORMAL;
+        try {
+            exif = new ExifInterface(fd);
+            orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return rotateBitmap(result, orientation);
+    }
+
     // http://stackoverflow.com/a/20480741/2088273
     public static Bitmap rotateBitmap(Bitmap bitmap, int orientation) {
         Matrix matrix = new Matrix();
@@ -117,6 +162,19 @@ public class BitmapUtil {
             e.printStackTrace();
             return bitmap;
         }
+    }
+
+    public static FileDescriptor getFileDescriptor(Context context, String path) {
+        Uri uri = Uri.parse(path);
+        FileDescriptor fd = null;
+        ContentResolver contentResolver = context.getContentResolver();
+        try {
+            ParcelFileDescriptor pfd = contentResolver.openFileDescriptor(uri, "r");
+            fd = pfd.getFileDescriptor();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return fd;
     }
 
     // http://stackoverflow.com/a/19739471/2088273

@@ -1,5 +1,5 @@
 /*
- *           Copyright © 2015-2016, 2019 Stanislav Petriakov
+ *           Copyright © 2015-2016, 2019, 2021 Stanislav Petriakov
  *  Distributed under the Boost Software License, Version 1.0.
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
@@ -7,6 +7,7 @@
 
 package com.keenfin.easypicker;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -57,9 +58,10 @@ public class PhotoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         mPhoto.setImageDrawable(photo);
     }
 
-    public void loadPhoto(String path, int size) {
-        BitmapWorkerTask task = new BitmapWorkerTask(mPhoto, size > 0 ? size : Constants.REQUIRED_THUMBNAIL_SIZE);
-        task.execute(path);
+    public void loadPhoto(Context context, String path, int size) {
+        size = size > 0 ? size : Constants.REQUIRED_THUMBNAIL_SIZE;
+        BitmapWorkerTask task = new BitmapWorkerTask(mPhoto, size, path, BitmapUtil.getFileDescriptor(context, path));
+        task.execute();
     }
 
     public void setOnClickListener(IViewHolderClick listener) {

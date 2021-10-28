@@ -52,6 +52,7 @@ public class PhotoPicker extends RecyclerView {
     private boolean mIsOneLine = false, mIsUsePreview = true, mDefaultPreview = false;
     private boolean mPrimaryColorDefined, mAccentColorDefined;
     boolean mIsNougat;
+    boolean mIsR;
 
     private Context mContext;
     private PhotoAdapter mPhotoAdapter;
@@ -79,6 +80,7 @@ public class PhotoPicker extends RecyclerView {
 
     private void init(Context context, boolean noControls) {
         mIsNougat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N;
+        mIsR = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R;
         mContext = context;
         mImagesPerRow = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? mImagesPerRowLandscape : mImagesPerRowPortrait;
         RecyclerView.LayoutManager layoutManager;
@@ -133,7 +135,7 @@ public class PhotoPicker extends RecyclerView {
     protected Parcelable onSaveInstanceState() {
         Bundle bundle = new Bundle();
         bundle.putParcelable("instanceState", super.onSaveInstanceState());
-        bundle.putStringArrayList(Constants.BUNDLE_ATTACHED_IMAGES, mPhotoAdapter.getImagesPath());
+        bundle.putStringArrayList(Constants.BUNDLE_ATTACHED_IMAGES, mPhotoAdapter.getImagesPathOrUri());
         bundle.putInt(Constants.BUNDLE_CAMERA_REQUEST, mCameraRequest);
         bundle.putInt(Constants.BUNDLE_PICK_REQUEST, mPickRequest);
 
@@ -188,8 +190,8 @@ public class PhotoPicker extends RecyclerView {
         super.setAdapter(adapter);
     }
 
-    public void restoreImages(List<String> imagesPath) {
-        mPhotoAdapter.restoreImages(imagesPath);
+    public void restoreImages(List<String> imagesPathOrUri) {
+        mPhotoAdapter.restoreImages(imagesPathOrUri);
     }
 
     public void setMaxPhotos(int maxPhotos) {
@@ -212,22 +214,22 @@ public class PhotoPicker extends RecyclerView {
         mPhotoAdapter.replaceNewPhotoIcon(drawableResourceId);
     }
 
-    public ArrayList<String> getImagesPath() {
-        return mPhotoAdapter.getImagesPath();
+    public ArrayList<String> getImagesPathOrUri() {
+        return mPhotoAdapter.getImagesPathOrUri();
     }
 
     public class PhotoAdapter extends RecyclerView.Adapter<PhotoViewHolder> implements PhotoViewHolder.IViewHolderClick {
-        private List<String> mImagesPath;
+        private final List<String> mImagesPathOrUri;
         private Uri mPhotoUri;
 
-        private boolean mNoControls;
+        private final boolean mNoControls;
 
         public PhotoAdapter() {
             this(false);
         }
 
         public PhotoAdapter(boolean noControls) {
-            mImagesPath = new ArrayList<>();
+            mImagesPathOrUri = new ArrayList<>();
             mNoControls = noControls;
 
             if (!noControls)
@@ -235,12 +237,12 @@ public class PhotoPicker extends RecyclerView {
         }
 
         private void addNewPhotoIcon() {
-            mImagesPath.add(0, null);
+            mImagesPathOrUri.add(0, null);
             notifyItemInserted(0);
         }
 
         protected void replaceNewPhotoIcon(int drawableResourceId) {
-            if (!mNoControls && mImagesPath.size() > 0) {
+            if (!mNoControls && mImagesPathOrUri.size() > 0) {
                 mNewPhotoIcon = ContextCompat.getDrawable(mContext, drawableResourceId);
                 notifyItemChanged(0);
             }
@@ -262,18 +264,18 @@ public class PhotoPicker extends RecyclerView {
             if (isControl)
                 holder.setIcon(mNewPhotoIcon);
             else
-                holder.loadPhoto(mImagesPath.get(position), getMeasuredWidth() / mImagesPerRow);
+                holder.loadPhoto(mContext, mImagesPathOrUri.get(position), getMeasuredWidth() / mImagesPerRow);
 
             holder.adjustControl(getMeasuredWidth() / mImagesPerRow, mColorPrimary, isControl, mIsOneLine, mNoControls);
         }
 
         @Override
         public int getItemCount() {
-            return mImagesPath.size();
+            return mImagesPathOrUri.size();
         }
 
-        public ArrayList<String> getImagesPath() {
-            ArrayList<String> images = new ArrayList<>(mImagesPath);
+        public ArrayList<String> getImagesPathOrUri() {
+            ArrayList<String> images = new ArrayList<>(mImagesPathOrUri);
 
             if (!mNoControls)
                 images.remove(0);
@@ -281,8 +283,8 @@ public class PhotoPicker extends RecyclerView {
             return images;
         }
 
-        protected void restoreImages(List<String> imagesPath) {
-            for (String imagePath : imagesPath)
+        protected void restoreImages(List<String> imagesPathOrUri) {
+            for (String imagePath : imagesPathOrUri)
                 addImage(imagePath);
         }
 
@@ -300,7 +302,7 @@ public class PhotoPicker extends RecyclerView {
         }
 
         @RequiresApi(api = Build.VERSION_CODES.R)
-        private void askForPermission() {
+        private void askForAllFilesAccess() {
             String message = mContext.getString(R.string.manage_all_files_message);
             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
             builder.setTitle(R.string.manage_all_files)
@@ -322,14 +324,6 @@ public class PhotoPicker extends RecyclerView {
                     if (mMaxPhotos > -1 && getItemCount() - 1 >= mMaxPhotos) {
                         Toast.makeText(mContext, String.format(mContext.getString(R.string.max_photos), mMaxPhotos), Toast.LENGTH_SHORT).show();
                         return;
-                    }
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        if (!Environment.isExternalStorageManager()) {
-                            Toast.makeText(mContext, R.string.manage_all_files_message, Toast.LENGTH_LONG).show();
-//                            askForPermission();
-                            return;
-                        }
                     }
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -379,7 +373,7 @@ public class PhotoPicker extends RecyclerView {
                     if (!mIsUsePreview)
                         return;
 
-                    ArrayList<String> imagesPath = getImagesPath();
+                    ArrayList<String> imagesPath = getImagesPathOrUri();
                     int offset = position - (mNoControls ? 0 : 1);
                     Intent preview;
 
@@ -389,13 +383,17 @@ public class PhotoPicker extends RecyclerView {
                         preview.putExtra(Constants.BUNDLE_NEW_PHOTO_PATH, offset);
                     } else {
                         preview = new Intent(Intent.ACTION_VIEW);
+                        String pathOrUri = imagesPath.get(offset);
 
-                        if (mIsNougat) {
-                            File path = new File(imagesPath.get(offset));
+                        if (mIsR && !pathOrUri.startsWith("/")) {
+                            preview.setDataAndType(Uri.parse(pathOrUri), "image/*");
+                            preview.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        } else if (mIsNougat) {
+                            File path = new File(pathOrUri);
                             preview.setDataAndType(FileProvider.getUriForFile(mContext, getUriProviderAuthority(getContext()), path), "image/*");
                             preview.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         } else
-                            preview.setDataAndType(Uri.parse("file://" + imagesPath.get(offset)), "image/*");
+                            preview.setDataAndType(Uri.parse("file://" + pathOrUri), "image/*");
                     }
 
                     getContext().startActivity(preview);
@@ -404,7 +402,7 @@ public class PhotoPicker extends RecyclerView {
                 if (position <= 0)
                     return;
 
-                mImagesPath.remove(position);
+                mImagesPathOrUri.remove(position);
                 notifyItemRemoved(position);
                 measureParent();
             }
@@ -421,7 +419,11 @@ public class PhotoPicker extends RecyclerView {
                                                         public void onScanCompleted(String path, Uri uri) {}
                                                     });
                 } else if (requestCode == mPickRequest) {
-                    selectedImagePath = FileUtil.getRealPath(mContext, data.getData());
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        selectedImagePath = data.getData().toString();
+                    } else {
+                        selectedImagePath = FileUtil.getRealPath(mContext, data.getData());
+                    }
                 } else if (requestCode == mPermissionRequest) {
                     onItemClick(R.id.iv_photo, 0);
                     return;
@@ -437,8 +439,8 @@ public class PhotoPicker extends RecyclerView {
                 return false;
             }
 
-            boolean result = mImagesPath.add(imagePath);
-            notifyItemInserted(mImagesPath.size() - 1);
+            boolean result = mImagesPathOrUri.add(imagePath);
+            notifyItemInserted(mImagesPathOrUri.size() - 1);
             measureParent();
 
             return result;
@@ -446,7 +448,7 @@ public class PhotoPicker extends RecyclerView {
 
         void measureParent() {
             ViewGroup.LayoutParams params = getLayoutParams();
-            int itemsCount = mIsOneLine ? 1 : mImagesPath.size();
+            int itemsCount = mIsOneLine ? 1 : mImagesPathOrUri.size();
             params.height = (int) Math.ceil(1f * itemsCount / mImagesPerRow) * getMeasuredWidth() / mImagesPerRow;
             setLayoutParams(params);
         }

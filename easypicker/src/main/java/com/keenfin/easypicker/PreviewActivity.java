@@ -1,5 +1,5 @@
 /*
- *           Copyright © 2015-2016, 2019 Stanislav Petriakov
+ *           Copyright © 2015-2016, 2019, 2021 Stanislav Petriakov
  *  Distributed under the Boost Software License, Version 1.0.
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
@@ -22,6 +22,8 @@ import android.widget.ImageView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.keenfin.easypicker.BitmapUtil.getFileDescriptor;
 
 public class PreviewActivity extends AppCompatActivity {
     private List<String> mImages;
@@ -49,7 +51,7 @@ public class PreviewActivity extends AppCompatActivity {
     }
 
     private static class PreviewAdapter extends FragmentStatePagerAdapter {
-        private List<String> mImages;
+        private final List<String> mImages;
 
         public PreviewAdapter(FragmentManager fm, List<String> images) {
             super(fm);
@@ -85,8 +87,8 @@ public class PreviewActivity extends AppCompatActivity {
                 if (getArguments() != null)
                     imagePath = getArguments().getString(Constants.BUNDLE_ATTACHED_IMAGES);
 
-                BitmapWorkerTask task = new BitmapWorkerTask(mImage, maxSide);
-                task.execute(imagePath);
+                BitmapWorkerTask task = new BitmapWorkerTask(mImage, maxSide, imagePath, getFileDescriptor(getActivity().getApplicationContext(), imagePath));
+                task.execute();
             }
 
             return mImage;
