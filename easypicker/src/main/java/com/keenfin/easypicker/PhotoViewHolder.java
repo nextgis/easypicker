@@ -9,10 +9,11 @@ package com.keenfin.easypicker;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 public class PhotoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     private ImageButton mPhotoRemove;

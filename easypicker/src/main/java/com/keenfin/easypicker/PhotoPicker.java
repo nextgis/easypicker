@@ -22,13 +22,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +34,14 @@ import java.util.List;
 import java.util.Random;
 
 import static android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class PhotoPicker extends RecyclerView {
     private int mMaxPhotos = -1;
@@ -92,7 +93,7 @@ public class PhotoPicker extends RecyclerView {
 
         setLayoutManager(layoutManager);
 
-        int[] attrs = new int[]{R.attr.colorPrimary, R.attr.colorAccent};
+        int[] attrs = new int[]{androidx.appcompat.R.attr.colorPrimary, androidx.appcompat.R.attr.colorAccent};
         TypedArray styleable = context.obtainStyledAttributes(attrs);
         if (!mPrimaryColorDefined)
             mColorPrimary = getColor(styleable, 0, R.color.primary);
