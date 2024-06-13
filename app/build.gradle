@@ -8,12 +8,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.keenfin.easypickerdemo"
-        minSdkVersion 14
-        targetSdkVersion 30
+        minSdkVersion 16
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
     }

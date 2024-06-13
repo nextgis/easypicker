@@ -30,6 +30,7 @@
             easypicker:oneLineGallery="true"
             easypicker:previewDefault="true"/>
 
+
         <com.keenfin.easypicker.PhotoPicker
             android:id="@+id/pp_easypicker_grid"
             android:layout_width="match_parent"
@@ -43,6 +44,7 @@
             easypicker:photosPerRowPortrait="5"
             easypicker:primaryColor="@color/accent"
             easypicker:usePreview="false"/>
+
 
         <com.keenfin.easypicker.PhotoPicker
             android:id="@+id/pp_easypicker_grid_no_controls"

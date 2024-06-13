@@ -360,6 +360,7 @@ public class PhotoPicker extends RecyclerView {
                                     break;
                                 case 1:
                                     intent = new Intent(Intent.ACTION_GET_CONTENT);
+                                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                                     intent.setType("image/*");
                                     mPickRequest = randomizeRequest.nextInt(0xffff);
                                     ((Activity) mContext).startActivityForResult(
@@ -419,6 +420,19 @@ public class PhotoPicker extends RecyclerView {
                                                         public void onScanCompleted(String path, Uri uri) {}
                                                     });
                 } else if (requestCode == mPickRequest) {
+                    if (data.getClipData() != null){ // multi select
+                        int count = data.getClipData().getItemCount(); //evaluate the count before the for loop --- otherwise, the count is evaluated every loop.
+                        for(int i = 0; i < count; i++) {
+                            Uri imageUri = data.getClipData().getItemAt(i).getUri();
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+                                selectedImagePath = imageUri.toString();
+                            } else {
+                                selectedImagePath = FileUtil.getRealPath(mContext, imageUri);
+                            }
+                            addImage(selectedImagePath);
+                        }
+                        return;
+                    }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         selectedImagePath = data.getData().toString();
                     } else {
@@ -427,7 +441,9 @@ public class PhotoPicker extends RecyclerView {
                 } else if (requestCode == mPermissionRequest) {
                     onItemClick(R.id.iv_photo, 0);
                     return;
-                } else {return;}
+                } else {
+                    return;
+                }
 
                 addImage(selectedImagePath);
             }

@@ -6,39 +6,19 @@
  */
 
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-group='com.github.4eRTuk'
+//apply plugin: 'com.github.dcendents.android-maven'
+//group='com.github.4eRTuk'
 
 ext {
-    bintrayRepo = 'maven'
-    bintrayName = 'easypicker'
 
-    publishedGroupId = 'com.4ert'
-    libraryName = 'EasyPicker'
-    artifact = 'easypicker'
-
-    libraryDescription = 'Easy photo gallery picker for Android.'
-
-    siteUrl = 'https://github.com/4eRTuk/easypicker'
-    gitUrl = 'https://github.com/4eRTuk/easypicker.git'
-
-    libraryVersion = '0.2.20'
-
-    developerId = '4ert'
-    developerName = 'Stanislav Petriakov'
-    developerEmail = 'becomeglory@gmail.com'
-
-    licenseName = 'Boost Software License, Version 1.0'
-    licenseUrl = 'http://www.boost.org/LICENSE_1_0.txt'
-    allLicenses = ["BSL-1.0"]
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 33
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 30
+        minSdkVersion 16
+        targetSdkVersion 33
         versionCode 23
         versionName "0.2.20"
     }
