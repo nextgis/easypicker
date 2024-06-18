@@ -110,6 +110,7 @@ public class PhotoPicker extends RecyclerView {
         mImagesPerRowLandscape = styleable.getInt(R.styleable.PhotoPicker_photosPerRowLandscape, mImagesPerRowLandscape);
         mImagesPerRowPortrait = styleable.getInt(R.styleable.PhotoPicker_photosPerRowPortrait, mImagesPerRowPortrait);
         mIsOneLine = styleable.getBoolean(R.styleable.PhotoPicker_oneLineGallery, false);
+        mIsOneLine = false;
         int icon = styleable.getResourceId(R.styleable.PhotoPicker_newPhotosIcon, R.drawable.ic_add_white_48dp);
         mNewPhotoIcon = ContextCompat.getDrawable(context, icon);
         boolean noControls = styleable.getBoolean(R.styleable.PhotoPicker_noControls, false);
