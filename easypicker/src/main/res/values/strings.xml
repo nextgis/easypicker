@@ -12,8 +12,9 @@
   <string name="photo_remove">Remove</string>
   <string name="photo_fail_attach">Can\'t attach photo</string>
   <string name="hw_error">Media storage is not available</string>
-  <string name="max_photos">Max images is %d</string>
+  <string name="max_photos">Too many photos. Maximum number is %d</string>
   <string name="null_bitmap">Can not load specified image</string>
   <string name="manage_all_files">All files access</string>
   <string name="manage_all_files_message">App needs access to all files to select files from any directory on this device.</string>
+  <string name="download">Download</string>
 </resources>

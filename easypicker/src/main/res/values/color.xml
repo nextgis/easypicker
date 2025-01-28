@@ -10,4 +10,7 @@
     <color name="background">#77ffffff</color>
     <color name="primary">#eee</color>
     <color name="accent">#555</color>
+    <color name="grey">#6D6C6C</color>
+    <color name="white">#FFFFFF</color>
+
 </resources>

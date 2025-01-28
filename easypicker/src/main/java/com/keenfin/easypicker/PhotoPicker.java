@@ -9,6 +9,7 @@ package com.keenfin.easypicker;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,18 +23,34 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import static android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION;
+import static com.keenfin.easypicker.DownloadPhotoIntentService.EXTRA_HTTP_CODE;
+import static com.keenfin.easypicker.DownloadPhotoIntentService.EXTRA_PREVIEW;
+import static com.keenfin.easypicker.DownloadPhotoIntentService.EXTRA_TYPE;
+import static com.keenfin.easypicker.DownloadPhotoIntentService.EXTRA_URL;
+import static com.keenfin.easypicker.DownloadPhotoIntentService.EXTRA_URL_ID;
+import static com.keenfin.easypicker.DownloadPhotoIntentService.EXTRA_VALUE_END;
+import static com.keenfin.easypicker.DownloadPhotoIntentService.EXTRA_VALUE_START;
+
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -58,13 +75,20 @@ public class PhotoPicker extends RecyclerView {
     private Context mContext;
     private PhotoAdapter mPhotoAdapter;
     private Drawable mNewPhotoIcon;
+    private String login;
+    private String pass;
 
-    public PhotoPicker(Context context) {
-        this(context, false);
+    ArrayList<String> urlIsInProgress = new ArrayList<>();
+
+    public PhotoPicker(Context context, String login, String pass) {
+        this(context, false, login, pass);
     }
 
-    public PhotoPicker(Context context, boolean noControls) {
+    public PhotoPicker(Context context, boolean noControls,  String login, String pass) {
         super(context);
+
+        this.login = login;
+        this.pass = pass;
         mNewPhotoIcon = ContextCompat.getDrawable(context, R.drawable.ic_add_white_48dp);
         init(context, noControls);
     }
@@ -77,6 +101,12 @@ public class PhotoPicker extends RecyclerView {
     public PhotoPicker(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(context, attrs);
+    }
+
+    public void setLoginPass(String login, String pass){
+        this.login = login;
+        this.pass = pass;
+        mPhotoAdapter.setLoginPass(login, pass);
     }
 
     private void init(Context context, boolean noControls) {
@@ -92,6 +122,7 @@ public class PhotoPicker extends RecyclerView {
             layoutManager = new GridLayoutManager(context, mImagesPerRow);
 
         setLayoutManager(layoutManager);
+        setHasFixedSize(true);
 
         int[] attrs = new int[]{androidx.appcompat.R.attr.colorPrimary, androidx.appcompat.R.attr.colorAccent};
         TypedArray styleable = context.obtainStyledAttributes(attrs);
@@ -101,7 +132,7 @@ public class PhotoPicker extends RecyclerView {
             mColorAccent = getColor(styleable, 1, R.color.accent);
         styleable.recycle();
 
-        PhotoAdapter adapter = new PhotoAdapter(noControls);
+        PhotoAdapter adapter = new PhotoAdapter(noControls, login, pass);
         setAdapter(adapter);
     }
 
@@ -137,7 +168,8 @@ public class PhotoPicker extends RecyclerView {
     protected Parcelable onSaveInstanceState() {
         Bundle bundle = new Bundle();
         bundle.putParcelable("instanceState", super.onSaveInstanceState());
-        bundle.putStringArrayList(Constants.BUNDLE_ATTACHED_IMAGES, mPhotoAdapter.getImagesPathOrUri());
+        bundle.putParcelableArrayList(Constants.BUNDLE_ATTACHED_IMAGES, (ArrayList<? extends android.os.Parcelable>) mPhotoAdapter.getImagesPathOrUriAttach());
+        //outState.putParcelableArrayList(KEY_STATES, (ArrayList<? extends android.os.Parcelable>) mListAdapter.getCheckState());
         bundle.putInt(Constants.BUNDLE_CAMERA_REQUEST, mCameraRequest);
         bundle.putInt(Constants.BUNDLE_PICK_REQUEST, mPickRequest);
 
@@ -155,10 +187,10 @@ public class PhotoPicker extends RecyclerView {
             if (bundle.containsKey(Constants.BUNDLE_NEW_PHOTO_PATH))
                 mPhotoAdapter.setPhotoUri(Uri.parse(bundle.getString(Constants.BUNDLE_NEW_PHOTO_PATH)));
 
-            List<String> images = bundle.getStringArrayList(Constants.BUNDLE_ATTACHED_IMAGES);
+            List<AttachInfo> images = bundle.getParcelableArrayList(Constants.BUNDLE_ATTACHED_IMAGES);
             if (images == null)
                 images = new ArrayList<>();
-            mPhotoAdapter.restoreImages(images);
+            mPhotoAdapter.restoreImages(images, null);
             mCameraRequest = bundle.getInt(Constants.BUNDLE_CAMERA_REQUEST);
             mPickRequest = bundle.getInt(Constants.BUNDLE_PICK_REQUEST);
 
@@ -192,8 +224,8 @@ public class PhotoPicker extends RecyclerView {
         super.setAdapter(adapter);
     }
 
-    public void restoreImages(List<String> imagesPathOrUri) {
-        mPhotoAdapter.restoreImages(imagesPathOrUri);
+    public void restoreImages(List<AttachInfo> imagesPathOrUri, Map<String, AttachInfo> onlineAttaches) {
+        mPhotoAdapter.restoreImages(imagesPathOrUri, onlineAttaches);
     }
 
     public void setMaxPhotos(int maxPhotos) {
@@ -216,23 +248,22 @@ public class PhotoPicker extends RecyclerView {
         mPhotoAdapter.replaceNewPhotoIcon(drawableResourceId);
     }
 
-    public ArrayList<String> getImagesPathOrUri() {
+    public List<AttachInfo> getImagesPathOrUri() {
         return mPhotoAdapter.getImagesPathOrUri();
     }
 
     public class PhotoAdapter extends RecyclerView.Adapter<PhotoViewHolder> implements PhotoViewHolder.IViewHolderClick {
-        private final List<String> mImagesPathOrUri;
+        private final ArrayList<AttachInfo> mImagesPathOrUri;
         private Uri mPhotoUri;
-
+        private String login;
+        private String pass;
         private final boolean mNoControls;
 
-        public PhotoAdapter() {
-            this(false);
-        }
-
-        public PhotoAdapter(boolean noControls) {
+        public PhotoAdapter(boolean noControls, String login, String pass) {
             mImagesPathOrUri = new ArrayList<>();
             mNoControls = noControls;
+            this.login = login;
+            this.pass = pass;
 
             if (!noControls)
                 addNewPhotoIcon();
@@ -250,25 +281,74 @@ public class PhotoPicker extends RecyclerView {
             }
         }
 
+        public void setLoginPass(String login, String pass){
+            this.login = login;
+            this.pass = pass;
+        }
+
         @NonNull
         @Override
         public PhotoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.photo_item, parent, false);
-            view.setBackgroundColor(mColorAccent);
+            //view.setBackgroundColor(mColorAccent);
+            view.setBackgroundColor(getResources().getColor(R.color.white));
             return new PhotoViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(final PhotoViewHolder holder, final int position) {
-            holder.setOnClickListener(this);
 
+            holder.setOnClickListener(this);
             boolean isControl = position == 0 && !mNoControls;
+            holder.adjustControl(getMeasuredWidth() / mImagesPerRow, mColorPrimary, isControl, mIsOneLine, mNoControls);
+            // todo
+
             if (isControl)
                 holder.setIcon(mNewPhotoIcon);
-            else
-                holder.loadPhoto(mContext, mImagesPathOrUri.get(position), getMeasuredWidth() / mImagesPerRow);
+            else {
+                AttachInfo attachInfo = mImagesPathOrUri.get(position);
+                holder.setOnline(attachInfo.onlineAttach ,mNoControls);
 
-            holder.adjustControl(getMeasuredWidth() / mImagesPerRow, mColorPrimary, isControl, mIsOneLine, mNoControls);
+                if (!attachInfo.onlineAttach)
+                    holder.loadPhoto(mContext, attachInfo.oldAttachString, getMeasuredWidth() / mImagesPerRow, null);
+                else {
+                    File cacheDir = getContext().getExternalCacheDir();
+                    File fileInCache = new File(cacheDir.getAbsoluteFile() + "/" + attachInfo.storePath + attachInfo.filename);
+                    File previewFile =  new File(cacheDir.getAbsoluteFile() + "/" + attachInfo.storePath + "preview_" + attachInfo.filename);
+
+
+                    boolean inProgress = false;
+                    for (String item: urlIsInProgress){
+                        if (item.equals(attachInfo.url)) {
+                            inProgress = true;
+                            break;
+                        }
+                    }
+
+                    if (!previewFile.exists() || previewFile.length() <= 0) {
+                       if (!inProgress)
+                        startDownloadPreviewImageFromWeb( position, login, pass,
+                                holder.pImageWidth,
+                                holder.pImageHeight);
+                    }
+
+
+                    if ( (fileInCache.exists() && fileInCache.length() > 0)|| (previewFile.exists() && previewFile.length() > 0)){
+                        holder.loadPhoto(mContext, cacheDir.getAbsoluteFile() + "/" + attachInfo.storePath + attachInfo.filename, getMeasuredWidth() / mImagesPerRow, previewFile);
+                    }
+
+                    if (fileInCache.exists() && fileInCache.length() > 0){
+                        holder.mPhotoDownload.setVisibility(GONE);
+                    } else {
+                        holder.mPhotoDownload.setVisibility(inProgress? GONE : VISIBLE);
+                    }
+
+                    holder.progressBar.setVisibility(inProgress? VISIBLE : GONE);
+                        //holder.mPhoto.setImageDrawable(holder.itemView.getContext().getResources().getDrawable(R.drawable.));
+                        //holder.loadPhotoOnline(mContext,getMeasuredWidth() / mImagesPerRow,  attachInfo);
+                    // online attach
+                }
+            }
         }
 
         @Override
@@ -276,18 +356,25 @@ public class PhotoPicker extends RecyclerView {
             return mImagesPathOrUri.size();
         }
 
-        public ArrayList<String> getImagesPathOrUri() {
-            ArrayList<String> images = new ArrayList<>(mImagesPathOrUri);
 
-            if (!mNoControls)
-                images.remove(0);
+        public ArrayList<AttachInfo> getImagesPathOrUriAttach() {
+            ArrayList<AttachInfo> images = new ArrayList<>();
+            for (AttachInfo attachInfo:mImagesPathOrUri)
 
-            return images;
+                if (attachInfo != null && !attachInfo.onlineAttach)
+                    images.add(attachInfo);
+           return images;
         }
 
-        protected void restoreImages(List<String> imagesPathOrUri) {
-            for (String imagePath : imagesPathOrUri)
-                addImage(imagePath);
+        public ArrayList<AttachInfo> getImagesPathOrUri() {
+            return  mImagesPathOrUri;
+        }
+
+        protected void restoreImages(List<AttachInfo> imagesPathOrUri, Map<String, AttachInfo> onlineAttaches) {
+            for (AttachInfo image : imagesPathOrUri)
+                addImage(image);
+            for (AttachInfo image : onlineAttaches.values())
+                addImage(image);
         }
 
         public Uri getPhotoUri() {
@@ -323,7 +410,7 @@ public class PhotoPicker extends RecyclerView {
         private void onItemClick(int id, int position) {
             if (id == R.id.iv_photo) {
                 if (position == 0 && !mNoControls) {
-                    if (mMaxPhotos > -1 && getItemCount() - 1 >= mMaxPhotos) {
+                    if (mMaxPhotos != -1 && getItemCount() - 1 >= mMaxPhotos) {
                         Toast.makeText(mContext, String.format(mContext.getString(R.string.max_photos), mMaxPhotos), Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -361,6 +448,7 @@ public class PhotoPicker extends RecyclerView {
                                     ((Activity) mContext).startActivityForResult(intent, mCameraRequest);
                                     break;
                                 case 1:
+
                                     intent = new Intent(Intent.ACTION_GET_CONTENT);
                                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                                     intent.setType("image/*");
@@ -376,23 +464,44 @@ public class PhotoPicker extends RecyclerView {
                     if (!mIsUsePreview)
                         return;
 
-                    ArrayList<String> imagesPath = getImagesPathOrUri();
+                    ArrayList<AttachInfo> imagesPath = getImagesPathOrUri();
                     int offset = position - (mNoControls ? 0 : 1);
                     Intent preview;
 
+                    ArrayList<String> paths = new ArrayList<>();
+                    for (AttachInfo info:imagesPath){
+                        if (info == null)
+                            continue;
+
+                        if (info.onlineAttach) {
+                            String filepath = getContext().getExternalCacheDir().getAbsolutePath() + "/" + info.storePath + "/" + info.filename;
+                            paths.add(filepath);
+                        } else {
+                            String filepath = info.oldAttachString;
+                            paths.add(filepath);
+                        }
+                    }
+
                     if (!mDefaultPreview) {
                         preview = new Intent(getContext(), PreviewActivity.class);
-                        preview.putExtra(Constants.BUNDLE_ATTACHED_IMAGES, imagesPath);
+                        preview.putStringArrayListExtra(Constants.BUNDLE_ATTACHED_IMAGES, paths);
                         preview.putExtra(Constants.BUNDLE_NEW_PHOTO_PATH, offset);
                     } else {
                         preview = new Intent(Intent.ACTION_VIEW);
-                        String pathOrUri = imagesPath.get(offset);
+                        AttachInfo pathOrUriAttachInfo = imagesPath.get(offset);
+                        String pathOrUri = getContext().getExternalCacheDir() + "/" + (pathOrUriAttachInfo.onlineAttach ? pathOrUriAttachInfo.storePath + pathOrUriAttachInfo.filename : pathOrUriAttachInfo.oldAttachString);
 
                         if (mIsR && !pathOrUri.startsWith("/")) {
                             preview.setDataAndType(Uri.parse(pathOrUri), "image/*");
                             preview.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         } else if (mIsNougat) {
                             File path = new File(pathOrUri);
+
+                            if (!path.exists() || path.length() <= 0) {
+                                startDownloadImageFromWeb( position, login, pass);
+                                return;
+                            }
+
                             preview.setDataAndType(FileProvider.getUriForFile(mContext, getUriProviderAuthority(getContext()), path), "image/*");
                             preview.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         } else
@@ -408,7 +517,35 @@ public class PhotoPicker extends RecyclerView {
                 mImagesPathOrUri.remove(position);
                 notifyItemRemoved(position);
                 measureParent();
+            } else if (id == R.id.ib_download) { // download image
+                if (position < 0)
+                    return;
+                startDownloadImageFromWeb( position, login, pass);
             }
+        }
+
+        void startDownloadImageFromWeb(int position, String login, String pass){
+            AttachInfo attachInfo = mImagesPathOrUri.get(position);
+
+            urlIsInProgress.add(attachInfo.url);
+
+
+            DownloadPhotoIntentService.startActionDownload(
+                    getContext(), attachInfo.url,
+                    attachInfo.storePath,
+                    attachInfo.filename,
+                    login, pass);
+            updateNotifyItemByURL(attachInfo.url);
+        }
+
+        void startDownloadPreviewImageFromWeb(int position, String login, String pass,
+                                              int width, int height){
+            AttachInfo attachInfo = mImagesPathOrUri.get(position);
+            DownloadPhotoIntentService.startActionDownload(
+                    getContext(), attachInfo.url + "?size=" + width +"x" +  height,
+                    attachInfo.storePath,
+                    "preview_" + attachInfo.filename,
+                    login, pass, width, height, attachInfo.url);
         }
 
         void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -424,6 +561,10 @@ public class PhotoPicker extends RecyclerView {
                 } else if (requestCode == mPickRequest) {
                     if (data.getClipData() != null){ // multi select
                         int count = data.getClipData().getItemCount(); //evaluate the count before the for loop --- otherwise, the count is evaluated every loop.
+                        if (mMaxPhotos != -1 && count + getItemCount()-1 > mMaxPhotos) {
+                                Toast.makeText(mContext, String.format(mContext.getString(R.string.max_photos), mMaxPhotos), Toast.LENGTH_SHORT).show();
+                                return;
+                        }
                         for(int i = 0; i < count; i++) {
                             Uri imageUri = data.getClipData().getItemAt(i).getUri();
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
@@ -431,7 +572,7 @@ public class PhotoPicker extends RecyclerView {
                             } else {
                                 selectedImagePath = FileUtil.getRealPath(mContext, imageUri);
                             }
-                            addImage(selectedImagePath);
+                            addImage( new AttachInfo(false, selectedImagePath, "-1"));
                         }
                         return;
                     }
@@ -447,11 +588,11 @@ public class PhotoPicker extends RecyclerView {
                     return;
                 }
 
-                addImage(selectedImagePath);
+                addImage(new AttachInfo(false, selectedImagePath, "-1"));
             }
         }
 
-        private boolean addImage(String imagePath) {
+        private boolean addImage(AttachInfo imagePath) {
             if (imagePath == null) {
                 Toast.makeText(mContext, mContext.getString(R.string.photo_fail_attach), Toast.LENGTH_SHORT).show();
                 return false;
@@ -470,9 +611,73 @@ public class PhotoPicker extends RecyclerView {
             params.height = (int) Math.ceil(1f * itemsCount / mImagesPerRow) * getMeasuredWidth() / mImagesPerRow;
             setLayoutParams(params);
         }
+
+        public void updateStatus(Intent intent){
+            Toast.makeText(getContext(), "intent", Toast.LENGTH_LONG).show();
+        }
     }
 
     public static String getUriProviderAuthority(Context context) {
         return context.getPackageName() + ".easypicker.provider";
+    }
+
+    public void updateStatus(Intent intent){
+        String url = intent.getExtras().getString(EXTRA_URL);
+        String urlId = intent.getExtras().getString(EXTRA_URL_ID);
+        String type = intent.getExtras().getString(EXTRA_TYPE);
+        int responseCode = intent.getExtras().getInt(EXTRA_HTTP_CODE, -1);
+        boolean previewOperation = intent.getExtras().getBoolean(EXTRA_PREVIEW, false);
+
+        if (!previewOperation && responseCode == HTTP_NOT_FOUND){
+            Toast.makeText(getContext(), "unable to locate picture on server", Toast.LENGTH_LONG).show();
+        }
+
+        //EXTRA_VALUE_START: EXTRA_VALUE_END
+        if (type.equals(EXTRA_VALUE_START)){
+            //urlIsInProgress.add(urlId);
+        }
+
+        if (type.equals(EXTRA_VALUE_END)){
+            for (int i = 0; i<urlIsInProgress.size(); i++){
+                if (urlIsInProgress.get(i).equals(urlId)) {
+                    urlIsInProgress.remove(i);
+                    break;
+                }
+            }
+
+//            for (String item:urlIsInProgress) {
+//                if (item.equals(urlId)) {
+//                    urlIsInProgress.remove(item);
+//                    break;
+//                }
+//            }
+        }
+        updateNotifyItemByURL(urlId);
+    }
+
+    public void updateNotifyItemByURL(String urlId){
+        Integer elementPosition = getElementIdByUrl(urlId);
+
+        if (elementPosition != null) {
+            getAdapter().notifyItemChanged(elementPosition);
+        }
+    }
+
+    public Integer getElementIdByUrl(String url){
+        ArrayList<AttachInfo> elementsList = mPhotoAdapter.getImagesPathOrUri();
+        for (int i =0; i < elementsList.size(); i++){
+            AttachInfo info = elementsList.get(i);
+            if (info == null)
+                continue;
+            if (info.onlineAttach && info.url.equals(url))
+                return i;
+            if (!info.onlineAttach && url.equals(info.oldAttachString))
+                return i;
+        }
+        return null;
+    }
+
+    public void updateInProgressList(final ArrayList<String> list){
+        urlIsInProgress.addAll(list);
     }
 }

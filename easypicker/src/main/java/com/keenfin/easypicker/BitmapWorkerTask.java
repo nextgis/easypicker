@@ -13,6 +13,7 @@ import android.os.Build;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.lang.ref.WeakReference;
 
@@ -22,6 +23,7 @@ public class BitmapWorkerTask extends AsyncTask<Void, Void, Bitmap> {
     private final int mSize;
     private final String mPath;
     private final FileDescriptor mFD;
+    private final AttachInfo attachInfo;
 
     public BitmapWorkerTask(ImageView imageView, int size, String path, FileDescriptor fd) {
         // Use a WeakReference to ensure the ImageView can be garbage collected
@@ -29,15 +31,35 @@ public class BitmapWorkerTask extends AsyncTask<Void, Void, Bitmap> {
         mSize = size;
         mPath = path;
         mFD = fd;
+        attachInfo = null;
+    }
+
+
+    // online
+    public BitmapWorkerTask(ImageView imageView, int size, AttachInfo attachInfo) {
+        // Use a WeakReference to ensure the ImageView can be garbage collected
+        mIvReference = new WeakReference<>(imageView);
+        mSize = size;
+
+        mPath = "";
+        mFD = null;
+        this.attachInfo = attachInfo;
+
     }
 
     // Decode image in background.
     @Override
     protected Bitmap doInBackground(Void... params)
     {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && mFD != null) {
-            return BitmapUtil.getBitmap(mFD);
+        if (attachInfo == null) {
+            // ofline case
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && mFD != null) {
+                return BitmapUtil.getBitmap(mFD);
+            } else {
+                return BitmapUtil.getBitmap(mPath, mSize);
+            }
         } else {
+            //online case  - load file or
             return BitmapUtil.getBitmap(mPath, mSize);
         }
     }

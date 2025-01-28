@@ -12,8 +12,10 @@
     <string name="photo_remove">Удалить</string>
     <string name="photo_fail_attach">Невозможно прикрепить фото</string>
     <string name="hw_error">Память устройства временно недоступна</string>
-    <string name="max_photos">Максимум %d фото</string>
+    <string name="max_photos">Слишком много фотографий. Максимальное количество: %d</string>
     <string name="null_bitmap">Невозможно загрузить изображение</string>
     <string name="manage_all_files">Доступ ко всем файлам</string>
     <string name="manage_all_files_message">Чтобы в приложении можно было выбирать файлы из любых директорий, нужно предоставить разрешение ко всем файлам.</string>
+    <string name="download">Загрузить</string>
+
 </resources>

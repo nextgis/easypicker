@@ -14,13 +14,13 @@ ext {
 }
 
 android {
-    compileSdkVersion 33
+
+    namespace "com.keenfin.easypicker"
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 33
-        versionCode 23
-        versionName "0.2.20"
+        minSdkVersion 26
+        compileSdk 34
+        targetSdkVersion 34
     }
     buildTypes {
         release {
@@ -28,14 +28,19 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_16
+        targetCompatibility JavaVersion.VERSION_16
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
 //    implementation 'com.android.support:appcompat-v7:28.0.0'
 //    implementation 'com.android.support:recyclerview-v7:28.0.0'
-    implementation'androidx.recyclerview:recyclerview:1.2.0'
+    implementation'androidx.recyclerview:recyclerview:1.3.1'
     //implementation 'com.android.support:support-v4:28.0.0'
     implementation'androidx.legacy:legacy-support-v4:1.0.0'
 }

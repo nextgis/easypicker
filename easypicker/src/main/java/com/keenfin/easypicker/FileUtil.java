@@ -378,4 +378,15 @@ public class FileUtil {
     private static boolean isGooglePhotosUri(Uri uri) {
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
     }
+
+
+    public static synchronized void createDir(File dir) throws RuntimeException
+    {
+        if (dir.exists()) {
+            return;
+        }
+        if (!dir.mkdirs()) {
+            throw new RuntimeException("Can not create dir " + dir);
+        }
+    }
 }
