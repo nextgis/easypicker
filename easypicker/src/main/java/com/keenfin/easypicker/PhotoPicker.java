@@ -371,10 +371,12 @@ public class PhotoPicker extends RecyclerView {
         }
 
         protected void restoreImages(List<AttachInfo> imagesPathOrUri, Map<String, AttachInfo> onlineAttaches) {
-            for (AttachInfo image : imagesPathOrUri)
-                addImage(image);
-            for (AttachInfo image : onlineAttaches.values())
-                addImage(image);
+            if (imagesPathOrUri!= null)
+                for (AttachInfo image : imagesPathOrUri)
+                    addImage(image);
+            if (onlineAttaches != null)
+                for (AttachInfo image : onlineAttaches.values())
+                    addImage(image);
         }
 
         public Uri getPhotoUri() {
@@ -669,9 +671,9 @@ public class PhotoPicker extends RecyclerView {
             AttachInfo info = elementsList.get(i);
             if (info == null)
                 continue;
-            if (info.onlineAttach && info.url.equals(url))
+            if (info.onlineAttach && info.url != null && info.url.equals(url))
                 return i;
-            if (!info.onlineAttach && url.equals(info.oldAttachString))
+            if (!info.onlineAttach && info.url != null && url.equals(info.oldAttachString))
                 return i;
         }
         return null;
