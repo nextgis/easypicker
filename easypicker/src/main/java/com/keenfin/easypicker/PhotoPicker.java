@@ -491,7 +491,11 @@ public class PhotoPicker extends RecyclerView {
                     } else {
                         preview = new Intent(Intent.ACTION_VIEW);
                         AttachInfo pathOrUriAttachInfo = imagesPath.get(offset);
-                        String pathOrUri = getContext().getExternalCacheDir() + "/" + (pathOrUriAttachInfo.onlineAttach ? pathOrUriAttachInfo.storePath + pathOrUriAttachInfo.filename : pathOrUriAttachInfo.oldAttachString);
+                        String pathOrUri = "";
+                        if (!pathOrUriAttachInfo.onlineAttach)
+                            pathOrUri = pathOrUriAttachInfo.oldAttachString;
+                        else
+                            pathOrUri = getContext().getExternalCacheDir() + "/" + (pathOrUriAttachInfo.onlineAttach ? pathOrUriAttachInfo.storePath + pathOrUriAttachInfo.filename : pathOrUriAttachInfo.oldAttachString);
 
                         if (mIsR && !pathOrUri.startsWith("/")) {
                             preview.setDataAndType(Uri.parse(pathOrUri), "image/*");
@@ -499,7 +503,7 @@ public class PhotoPicker extends RecyclerView {
                         } else if (mIsNougat) {
                             File path = new File(pathOrUri);
 
-                            if (!path.exists() || path.length() <= 0) {
+                            if (pathOrUriAttachInfo.onlineAttach && (!path.exists() || path.length() <= 0)) {
                                 startDownloadImageFromWeb( position, login, pass);
                                 return;
                             }
@@ -528,6 +532,9 @@ public class PhotoPicker extends RecyclerView {
 
         void startDownloadImageFromWeb(int position, String login, String pass){
             AttachInfo attachInfo = mImagesPathOrUri.get(position);
+
+            if (!attachInfo.onlineAttach)
+                return;
 
             urlIsInProgress.add(attachInfo.url);
 

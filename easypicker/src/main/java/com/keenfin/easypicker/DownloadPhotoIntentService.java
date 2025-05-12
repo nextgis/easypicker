@@ -93,7 +93,7 @@ public class DownloadPhotoIntentService extends Service {
     static public void deleteProgressListItem(String item){
         synchronized (objectProgressSync){
             for (String progressItem:inProgressList)
-                if (progressItem.equals(item)){
+                if (progressItem !=null && progressItem.equals(item)){
                     inProgressList.remove(progressItem);
                     return;
                 }
