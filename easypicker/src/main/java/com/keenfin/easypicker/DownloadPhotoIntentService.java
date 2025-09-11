@@ -36,6 +36,7 @@ public class DownloadPhotoIntentService extends Service {
 
     private static final String ITEM_FILEPATH = "com.nextgis.mobile.util.action.download.photo.filepath";
     private static final String ITEM_FILEPATH_FILE = "com.nextgis.mobile.util.action.download.photo.filepath.file";
+    private static final String USER_AGENT = "com.nextgis.mobile.util.action.download.photo.useragent";
 
 
     public final static int TIMEOUT_CONNECTION = 10000;
@@ -110,7 +111,7 @@ public class DownloadPhotoIntentService extends Service {
 //    }
 
     public static void startActionDownload(final Context context, String url, String filepath, String filename,
-                                           String login, String password) {
+                                           String login, String password, String userAgent) {
 
         final Intent intent = new Intent(context, DownloadPhotoIntentService.class);
         intent.setAction(ACTION_DOWNLOAD_PHOTO);
@@ -122,6 +123,7 @@ public class DownloadPhotoIntentService extends Service {
         intent.putExtra(EXTRA_LOGIN, login);
         intent.putExtra(EXTRA_PASS, password);
         intent.putExtra(EXTRA_PREVIEW, false);
+        intent.putExtra(USER_AGENT, userAgent);
 
         putProgressListItem(url);
 
@@ -129,7 +131,7 @@ public class DownloadPhotoIntentService extends Service {
     }
 
     public static void startActionDownload(final Context context, String url, String filepath, String filename,
-                                           String login, String password, int width, int height, String urlId) {
+                                           String login, String password, int width, int height, String urlId, String userAgent) {
         final Intent intent = new Intent(context, DownloadPhotoIntentService.class);
         intent.setAction(ACTION_DOWNLOAD_PHOTO);
         intent.putExtra(ITEM_URL, url);
@@ -142,6 +144,7 @@ public class DownloadPhotoIntentService extends Service {
         intent.putExtra(EXTRA_WIDTH, width);
         intent.putExtra(EXTRA_HEIGHT, height);
         intent.putExtra(EXTRA_PREVIEW, true);
+        intent.putExtra(USER_AGENT, userAgent);
 
         context.startService(intent);
     }
@@ -157,6 +160,8 @@ public class DownloadPhotoIntentService extends Service {
 
         final String login = intent.getExtras().getString(EXTRA_LOGIN);
         final String password = intent.getExtras().getString(EXTRA_PASS);
+        final String userAgent = intent.getExtras().getString(USER_AGENT);
+
         final String fullFilePath = getBaseContext().getExternalCacheDir().getAbsolutePath() + "/" + filepath;
 
         final File targetFile = new File(fullFilePath);
@@ -164,7 +169,8 @@ public class DownloadPhotoIntentService extends Service {
         sendBroadcast(getApplicationContext(), urlId, true, -1);
 
         try {
-            int responseCode = getFileFromStream(url, fullFilePath, filename, login, password);
+            int responseCode = getFileFromStream(url, fullFilePath, filename, login, password, userAgent );
+
             if (responseCode == HttpURLConnection.HTTP_OK)
                 sendBroadcast(getApplicationContext(), urlId, false, responseCode);
         } catch (Exception ex){
@@ -181,7 +187,7 @@ public class DownloadPhotoIntentService extends Service {
 
     protected int getFileFromStream(   String url,
                                         String filePath,
-                                        String filename, String login, String password)
+                                        String filename, String login, String password, String useragent)
                                         throws IOException {
         File file = new File(new File(filePath), filename);
         if (!file.exists()){
@@ -192,20 +198,21 @@ public class DownloadPhotoIntentService extends Service {
 
         OutputStream output = Files.newOutputStream(Paths.get(file.getAbsolutePath()));
         //getStream(url, getLogin(), getPassword(), output);
-        return getStream(url, login, password, output);
+        return getStream(url, login, password, output, useragent);
     }
 
     public int getStream(
             String targetURL,
             String username,
             String password,
-            OutputStream outputStream) throws IOException {
+            OutputStream outputStream,
+            String userAgent ) throws IOException {
         int    IO_BUFFER_SIZE     = 32 * 1024; // 32k
 
 
         //try {Thread.sleep(5000);} catch (Exception ex) {}
 
-        final HttpURLConnection conn = getHttpConnection("GET", targetURL, username, password);
+        final HttpURLConnection conn = getHttpConnection("GET", targetURL, username, password, userAgent);
         if (null == conn) {
             if (true)
                 Log.d(TAG, "Error get stream: " + targetURL);
@@ -214,7 +221,7 @@ public class DownloadPhotoIntentService extends Service {
         int responseCode = conn.getResponseCode();
         if (responseCode == HttpURLConnection.HTTP_MOVED_PERM && conn.getURL().getProtocol().equals("http")) {
             targetURL = targetURL.replace("http", "https");
-            return  getStream(targetURL, username, password, outputStream);
+            return  getStream(targetURL, username, password, outputStream, userAgent);
         }
 
         if ( responseCode == HttpURLConnection.HTTP_NOT_FOUND) //404
@@ -250,7 +257,8 @@ public class DownloadPhotoIntentService extends Service {
             String method,
             String targetURL,
             String username,
-            String password)
+            String password,
+            String userAgent)
             throws IOException {
 
         HttpURLConnection conn = getProperConnection(targetURL);
@@ -260,15 +268,16 @@ public class DownloadPhotoIntentService extends Service {
             conn.setRequestProperty("Authorization", basicAuth);
         }
 
-        return getHttpConnection(method, targetURL, conn);
+        return getHttpConnection(method, targetURL, conn, userAgent);
     }
 
     public HttpURLConnection getHttpConnection(
             String method,
             String targetURL,
-            HttpURLConnection conn)
+            HttpURLConnection conn,
+            String userAgent)
             throws IOException {
-        conn.setRequestProperty("User-Agent", getUserAgentPrefix() + " " + getUserAgentPostfix());
+        conn.setRequestProperty("User-Agent", userAgent);
 
         // Allow Inputs
         conn.setDoInput(true);

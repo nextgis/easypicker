@@ -7,6 +7,7 @@
 
 package com.keenfin.easypicker;
 
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -77,6 +78,12 @@ public class PhotoPicker extends RecyclerView {
     private Drawable mNewPhotoIcon;
     private String login;
     private String pass;
+
+    public String userAgent = null;
+
+    public void setUserAgent (final String agent){
+        this.userAgent = agent;
+    }
 
     ArrayList<String> urlIsInProgress = new ArrayList<>();
 
@@ -326,10 +333,11 @@ public class PhotoPicker extends RecyclerView {
                     }
 
                     if (!previewFile.exists() || previewFile.length() <= 0) {
-                       if (!inProgress)
-                        startDownloadPreviewImageFromWeb( position, login, pass,
-                                holder.pImageWidth,
-                                holder.pImageHeight);
+                       if (!inProgress) {
+                           startDownloadPreviewImageFromWeb(position, login, pass,
+                                   holder.pImageWidth,
+                                   holder.pImageHeight, userAgent);
+                       }
                     }
 
 
@@ -504,7 +512,7 @@ public class PhotoPicker extends RecyclerView {
                             File path = new File(pathOrUri);
 
                             if (pathOrUriAttachInfo.onlineAttach && (!path.exists() || path.length() <= 0)) {
-                                startDownloadImageFromWeb( position, login, pass);
+                                startDownloadImageFromWeb( position, login, pass, userAgent);
                                 return;
                             }
 
@@ -526,11 +534,11 @@ public class PhotoPicker extends RecyclerView {
             } else if (id == R.id.ib_download) { // download image
                 if (position < 0)
                     return;
-                startDownloadImageFromWeb( position, login, pass);
+                startDownloadImageFromWeb( position, login, pass, userAgent);
             }
         }
 
-        void startDownloadImageFromWeb(int position, String login, String pass){
+        void startDownloadImageFromWeb(int position, String login, String pass, String userAgent){
             AttachInfo attachInfo = mImagesPathOrUri.get(position);
 
             if (!attachInfo.onlineAttach)
@@ -543,18 +551,18 @@ public class PhotoPicker extends RecyclerView {
                     getContext(), attachInfo.url,
                     attachInfo.storePath,
                     attachInfo.filename,
-                    login, pass);
+                    login, pass, userAgent);
             updateNotifyItemByURL(attachInfo.url);
         }
 
         void startDownloadPreviewImageFromWeb(int position, String login, String pass,
-                                              int width, int height){
+                                              int width, int height, String userAgent){
             AttachInfo attachInfo = mImagesPathOrUri.get(position);
             DownloadPhotoIntentService.startActionDownload(
                     getContext(), attachInfo.url + "?size=" + width +"x" +  height,
                     attachInfo.storePath,
                     "preview_" + attachInfo.filename,
-                    login, pass, width, height, attachInfo.url);
+                    login, pass, width, height, attachInfo.url, userAgent);
         }
 
         void onActivityResult(int requestCode, int resultCode, Intent data) {
