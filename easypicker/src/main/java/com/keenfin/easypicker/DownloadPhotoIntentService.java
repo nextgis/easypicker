@@ -181,7 +181,7 @@ public class DownloadPhotoIntentService extends Service {
                 Log.e("TAG", ex1.toString());
             }
             sendBroadcast(getApplicationContext(), urlId, false, -1);
-            Log.e(TAG, ex.toString());
+            Log.d(TAG, ex.toString());
         }
     }
 
