@@ -48,6 +48,10 @@ public class AttachInfo implements Parcelable, Serializable {
         attachId = in.readString();
     }
 
+    public String getFilenameForUse(){
+        return filename.replace("/", "-");
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByte((byte) (onlineAttach ? 1 : 0));

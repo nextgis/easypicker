@@ -320,8 +320,8 @@ public class PhotoPicker extends RecyclerView {
                     holder.loadPhoto(mContext, attachInfo.oldAttachString, getMeasuredWidth() / mImagesPerRow, null);
                 else {
                     File cacheDir = getContext().getExternalCacheDir();
-                    File fileInCache = new File(cacheDir.getAbsoluteFile() + "/" + attachInfo.storePath + attachInfo.filename);
-                    File previewFile =  new File(cacheDir.getAbsoluteFile() + "/" + attachInfo.storePath + "preview_" + attachInfo.filename);
+                    File fileInCache = new File(cacheDir.getAbsoluteFile() + "/" + attachInfo.storePath + attachInfo.getFilenameForUse());
+                    File previewFile =  new File(cacheDir.getAbsoluteFile() + "/" + attachInfo.storePath + "preview_" + attachInfo.getFilenameForUse());
 
 
                     boolean inProgress = false;
@@ -342,7 +342,7 @@ public class PhotoPicker extends RecyclerView {
 
 
                     if ( (fileInCache.exists() && fileInCache.length() > 0)|| (previewFile.exists() && previewFile.length() > 0)){
-                        holder.loadPhoto(mContext, cacheDir.getAbsoluteFile() + "/" + attachInfo.storePath + attachInfo.filename, getMeasuredWidth() / mImagesPerRow, previewFile);
+                        holder.loadPhoto(mContext, cacheDir.getAbsoluteFile() + "/" + attachInfo.storePath + attachInfo.getFilenameForUse(), getMeasuredWidth() / mImagesPerRow, previewFile);
                     }
 
                     if (fileInCache.exists() && fileInCache.length() > 0){
@@ -484,7 +484,7 @@ public class PhotoPicker extends RecyclerView {
                             continue;
 
                         if (info.onlineAttach) {
-                            String filepath = getContext().getExternalCacheDir().getAbsolutePath() + "/" + info.storePath + "/" + info.filename;
+                            String filepath = getContext().getExternalCacheDir().getAbsolutePath() + "/" + info.storePath + "/" + info.getFilenameForUse();
                             paths.add(filepath);
                         } else {
                             String filepath = info.oldAttachString;
@@ -503,7 +503,7 @@ public class PhotoPicker extends RecyclerView {
                         if (!pathOrUriAttachInfo.onlineAttach)
                             pathOrUri = pathOrUriAttachInfo.oldAttachString;
                         else
-                            pathOrUri = getContext().getExternalCacheDir() + "/" + (pathOrUriAttachInfo.onlineAttach ? pathOrUriAttachInfo.storePath + pathOrUriAttachInfo.filename : pathOrUriAttachInfo.oldAttachString);
+                            pathOrUri = getContext().getExternalCacheDir() + "/" + (pathOrUriAttachInfo.onlineAttach ? pathOrUriAttachInfo.storePath + pathOrUriAttachInfo.getFilenameForUse() : pathOrUriAttachInfo.oldAttachString);
 
                         if (mIsR && !pathOrUri.startsWith("/")) {
                             preview.setDataAndType(Uri.parse(pathOrUri), "image/*");
@@ -550,7 +550,7 @@ public class PhotoPicker extends RecyclerView {
             DownloadPhotoIntentService.startActionDownload(
                     getContext(), attachInfo.url,
                     attachInfo.storePath,
-                    attachInfo.filename,
+                    attachInfo.getFilenameForUse(),
                     login, pass, userAgent);
             updateNotifyItemByURL(attachInfo.url);
         }
@@ -561,7 +561,7 @@ public class PhotoPicker extends RecyclerView {
             DownloadPhotoIntentService.startActionDownload(
                     getContext(), attachInfo.url + "?size=" + width +"x" +  height,
                     attachInfo.storePath,
-                    "preview_" + attachInfo.filename,
+                    "preview_" + attachInfo.getFilenameForUse(),
                     login, pass, width, height, attachInfo.url, userAgent);
         }
 
