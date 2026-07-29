@@ -18,4 +18,7 @@
     <string name="manage_all_files_message">Чтобы в приложении можно было выбирать файлы из любых директорий, нужно предоставить разрешение ко всем файлам.</string>
     <string name="download">Загрузить</string>
 
+    <string name="attach">Файл</string>
+    <string name="attach_not_aupport">Поддерживаем только изображения</string>
+
 </resources>

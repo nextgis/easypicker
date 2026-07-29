@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- Лист документа -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#37474F"
+        android:strokeWidth="2.5"
+        android:strokeLineJoin="round"
+        android:pathData="M12,4H28L38,14V42C38,43.1 37.1,44 36,44H12C10.9,44 10,43.1 10,42V6C10,4.9 10.9,4 12,4Z" />
+
+    <!-- Загнутый угол -->
+    <path
+        android:fillColor="#E0E0E0"
+        android:strokeColor="#37474F"
+        android:strokeWidth="2.5"
+        android:strokeLineJoin="round"
+        android:pathData="M28,4V14H38" />
+
+    <!-- Линия 1 -->
+    <path
+        android:strokeColor="#546E7A"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M16,22H32" />
+
+    <!-- Линия 2 -->
+    <path
+        android:strokeColor="#546E7A"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M16,28H32" />
+
+    <!-- Линия 3 -->
+    <path
+        android:strokeColor="#546E7A"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M16,34H27" />
+
+</vector>

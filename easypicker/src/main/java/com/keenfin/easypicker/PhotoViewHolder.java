@@ -31,6 +31,7 @@ public class PhotoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     public ImageButton mPhotoDownload;
     public int pImageHeight = 0;
     public int pImageWidth = 0;
+    public boolean isImage = true;
 
 
     public interface IViewHolderClick {

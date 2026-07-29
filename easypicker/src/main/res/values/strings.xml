@@ -17,4 +17,9 @@
   <string name="manage_all_files">All files access</string>
   <string name="manage_all_files_message">App needs access to all files to select files from any directory on this device.</string>
   <string name="download">Download</string>
+
+  <string name="attach">Attach</string>
+  <string name="attach_not_aupport">Suppport only image attachments</string>
+
+
 </resources>

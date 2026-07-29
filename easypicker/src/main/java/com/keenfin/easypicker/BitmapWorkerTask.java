@@ -51,16 +51,20 @@ public class BitmapWorkerTask extends AsyncTask<Void, Void, Bitmap> {
     @Override
     protected Bitmap doInBackground(Void... params)
     {
-        if (attachInfo == null) {
-            // ofline case
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && mFD != null) {
-                return BitmapUtil.getBitmap(mFD);
+        try {
+            if (attachInfo == null) {
+                // ofline case
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && mFD != null) {
+                    return BitmapUtil.getBitmap(mFD);
+                } else {
+                    return BitmapUtil.getBitmap(mPath, mSize);
+                }
             } else {
+                //online case  - load file or
                 return BitmapUtil.getBitmap(mPath, mSize);
             }
-        } else {
-            //online case  - load file or
-            return BitmapUtil.getBitmap(mPath, mSize);
+        }catch (Exception ex){
+            return null;
         }
     }
 
