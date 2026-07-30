@@ -19,6 +19,6 @@
     <string name="download">Загрузить</string>
 
     <string name="attach">Файл</string>
-    <string name="attach_not_aupport">Поддерживаем только изображения</string>
+    <string name="attach_not_aupport">Превью доступны только для изображений.</string>
 
 </resources>

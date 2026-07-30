@@ -19,7 +19,7 @@
   <string name="download">Download</string>
 
   <string name="attach">Attach</string>
-  <string name="attach_not_aupport">Suppport only image attachments</string>
+  <string name="attach_not_aupport">Previews are available only for image attachments.</string>
 
 
 </resources>
